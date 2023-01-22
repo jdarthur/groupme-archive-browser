@@ -4,7 +4,7 @@ import {Modal, Spin} from "antd";
 import {useGetMessagesFromMessageIdQuery} from "../../services/api";
 import SelectMessage from "./SelectMessage";
 
-export default function ThreadSelect({firstMessageId, visible, cancel, save}) {
+export default function ThreadSelect({firstMessageId, visible, cancel, save, setTotalMessages}) {
 
     const [messageId, setMessageId] = useState(null)
     const [index, setIndex] = useState(0)
@@ -65,7 +65,7 @@ export default function ThreadSelect({firstMessageId, visible, cancel, save}) {
         open={visible}
         width={500}
         onCancel={cancel}
-        onOk={() => save(messageId)}>
+        onOk={() => save(messageId, index + 1)}>
 
         <div style={{
             display: "flex",

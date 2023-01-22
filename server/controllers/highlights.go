@@ -23,25 +23,9 @@ func (hc HighlightsController) GetAllHighlights(c *gin.Context) {
 }
 
 func (hc HighlightsController) GetOneHighlight(c *gin.Context) {
-
-	idFromPath := c.Param("highlightId")
-	highlightId, err := primitive.ObjectIDFromHex(idFromPath)
+	highlight, err := getHighlightById(c)
 	if err != nil {
-		e := common.ApiErrorf400("Invalid highlight ID from path: %s", idFromPath)
-		common.RespondWithError(c, e)
-		return
-	}
-
-	highlight := models.Highlight{}
-	err = common.GetOneById(models.HighlightsCollection(), highlightId, &highlight)
-	if err != nil {
-		common.Respond500(c, err)
-		return
-	}
-
-	if highlight.HighlightId.IsZero() {
-		apiErr := common.ApiError404{Message: fmt.Sprintf("Highlight with ID %s not found", highlightId.Hex())}
-		common.RespondWithError(c, apiErr)
+		common.RespondWithError(c, err)
 		return
 	}
 
@@ -61,6 +45,28 @@ func (hc HighlightsController) CreateHighlight(c *gin.Context) {
 		} else {
 			common.RespondSuccess(c, created, 1, true)
 		}
+	}
+}
+
+func (hc HighlightsController) DeleteHighlight(c *gin.Context) {
+
+	highlight, err := getHighlightById(c)
+	if err != nil {
+		common.RespondWithError(c, err)
+		return
+	}
+
+	err = userFromTokenMatchesUserIdInDb(c, highlight)
+	if err != nil {
+		common.RespondWithError(c, err)
+		return
+	}
+
+	_, h, err1 := common.DeleteOne(models.HighlightsCollection(), highlight.HighlightId)
+	if err1 != nil {
+		common.Respond500(c, err1)
+	} else {
+		common.RespondSuccess(c, h, 1, false)
 	}
 }
 
@@ -195,4 +201,49 @@ func (hc HighlightsController) ValidateComponentPath(c *gin.Context) (firstMessa
 		return firstMessage, lastMessage, common.ApiErrorf400("First and last message IDs are from different channels")
 	}
 	return firstMessage, lastMessage, nil
+}
+
+func getHighlightById(c *gin.Context) (models.Highlight, common.ApiError) {
+	idFromPath := c.Param("highlightId")
+	highlightId, err := primitive.ObjectIDFromHex(idFromPath)
+	if err != nil {
+		e := common.ApiErrorf400("Invalid highlight ID from path: %s", idFromPath)
+		return models.Highlight{}, e
+	}
+
+	highlight := models.Highlight{}
+	err = common.GetOneById(models.HighlightsCollection(), highlightId, &highlight)
+	if err != nil {
+		return highlight, common.ApiErrorf500(err.Error())
+	}
+
+	if highlight.HighlightId.IsZero() {
+		return highlight, common.ApiError404{Message: fmt.Sprintf("Highlight with ID %s not found", highlightId.Hex())}
+	}
+	return highlight, nil
+}
+
+func userFromTokenMatchesUserIdInDb(c *gin.Context, highlight models.Highlight) common.ApiError {
+	auth0Sub, exists := c.Get(common.UserId)
+	if !exists {
+		return common.ApiError500{Message: "auth0_sub was not found in context"}
+	}
+
+	members := make([]models.Member, 0)
+	err := common.GetAllWhere(models.MembersCollection(), bson.M{"auth0_sub": auth0Sub}, &members)
+	if err != nil {
+		return common.ApiError500{Message: err.Error()}
+	}
+
+	if len(members) == 0 {
+		return common.ApiErrorf400("No members exist with auth0 sub %s", auth0Sub)
+	}
+
+	member := members[0]
+
+	if highlight.MemberId != member.MemberId.Hex() {
+		return common.ApiErrorf400("Token sub %s (which matched member %s) does not match the member ID in highlight (%s)",
+			auth0Sub, member.MemberId.Hex(), highlight.MemberId)
+	}
+	return nil
 }

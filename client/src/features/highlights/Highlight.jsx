@@ -2,6 +2,7 @@ import React from 'react';
 import {Avatar, Card, Popover} from "antd";
 import DateTime from "../common/DateTime";
 import HighlightComponent from "./HighlightComponent";
+import DeleteHighlight from "./DeleteHighlight";
 
 const titleStyle = {
     display: "inline-flex",
@@ -13,7 +14,10 @@ const titleStyle = {
 export default function Highlight({members, member_id, created_at, title, components, highlightId, expanded}) {
 
     const member = getMember(members?.resource, member_id)
-    const extra = getIcon(member, created_at)
+    const extra = <span>
+        {getIcon(member, created_at)}
+        <DeleteHighlight highlightId={highlightId} memberId={member_id} />
+    </span>
     const t = <span style={titleStyle}>
         <span>
             {title}

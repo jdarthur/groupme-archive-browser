@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Input, Modal, Select} from "antd";
+import {Input, Modal, Select, Tag} from "antd";
 import FormItem from "../common/FormItem";
 import MessagePreview from "./MessagePreview";
 import {useCreateHighlightMutation, useGetMembersQuery} from "../../services/api";
@@ -24,6 +24,7 @@ export default function CreateHighlight({visible, firstMessageId, cancel, setVis
     const [lastMessage, setLastMessage] = useState(null)
     const [comment, setComment] = useState("")
     const [title, setTitle] = useState("")
+    const [messageCount, setMessageCount] = useState(1)
 
     const noToken = !useAuth().token
     const {data: members} = useGetMembersQuery(undefined, {skip: noToken})
@@ -51,7 +52,10 @@ export default function CreateHighlight({visible, firstMessageId, cancel, setVis
                                style={{width: '100%'}} />
 
     const firstMessagePreview = <MessagePreview messageId={firstMessage} setMessageId={setFirstMessage} disabled />
-    const lastMessagePreview = <MessagePreview messageId={lastMessage} firstMessageId={firstMessage} setMessageId={setLastMessage} />
+    const lastMessagePreview = <MessagePreview messageId={lastMessage}
+                                               firstMessageId={firstMessage}
+                                               setMessageId={setLastMessage}
+                                               setMessageCount={setMessageCount} />
 
     const save = () => {
         const body = {
@@ -66,6 +70,7 @@ export default function CreateHighlight({visible, firstMessageId, cancel, setVis
         }
         console.log("create highlight: ", body)
         createHighlight(body)
+        setVisible(false)
         navigate("/highlights")
     }
 
@@ -76,6 +81,7 @@ export default function CreateHighlight({visible, firstMessageId, cancel, setVis
             width={700}
             onCancel={cancel}
             onOk={save}
+            okButtonProps={{disabled: title === ""}}
         >
 
             <div style={{display: "flex", flexDirection: "column", alignItems: "stretch"}}>
@@ -87,6 +93,9 @@ export default function CreateHighlight({visible, firstMessageId, cancel, setVis
                 {type === THREAD ?
                     <FormItem label={"Last Message"} input={lastMessagePreview} /> :
                     null }
+                <Tag style={{alignSelf: "flex-start"}}>
+                    {messageCount} total message{messageCount === 1 ? "" : "s"}
+                </Tag>
             </div>
 
         </Modal>

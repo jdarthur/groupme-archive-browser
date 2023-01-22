@@ -114,6 +114,13 @@ export const mainApi = createApi({
         getHighlightById: builder.query({
             query: (id) => `/api/highlights/${id}`
         }),
+        deleteHighlight: builder.mutation({
+            query: (id) => ({
+                url: `/api/highlights/${id}`,
+                method: "DELETE",
+            }),
+            invalidatesTags: ["highlights"]
+        }),
     }),
 })
 
@@ -141,4 +148,5 @@ export const {
     useGetMessageByIdQuery,
     useCreateHighlightMutation,
     useGetHighlightByIdQuery,
+    useDeleteHighlightMutation,
 } = mainApi

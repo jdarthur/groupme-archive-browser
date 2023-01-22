@@ -7,7 +7,7 @@ import {EditOutlined} from "@ant-design/icons";
 import ThreadSelect from "./ThreadSelect";
 import {useAuth} from "../../app/store";
 
-export default function MessagePreview({messageId, setMessageId, firstMessageId, disabled}) {
+export default function MessagePreview({messageId, setMessageId, firstMessageId, disabled, setMessageCount}) {
 
     const [threadSelectOpen, setThreadSelectOpen] = useState(false)
     const noToken = !useAuth().token
@@ -23,8 +23,9 @@ export default function MessagePreview({messageId, setMessageId, firstMessageId,
         setThreadSelectOpen(true)
     }
 
-    const save = (value) => {
+    const save = (value, messageCount) => {
         setMessageId(value)
+        setMessageCount(messageCount)
         setThreadSelectOpen(false)
     }
 
@@ -53,8 +54,11 @@ export default function MessagePreview({messageId, setMessageId, firstMessageId,
                                                          onClick={onButtonClick}
                                                          disabled={disabled}
             />
-            <ThreadSelect firstMessageId={firstMessageId} visible={threadSelectOpen}
-                          cancel={() => setThreadSelectOpen(false)} save={save}/>
+            <ThreadSelect firstMessageId={firstMessageId}
+                          visible={threadSelectOpen}
+                          cancel={() => setThreadSelectOpen(false)}
+                          save={save}
+            />
     </span>
 
     );
