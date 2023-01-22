@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jdarthur/groupme-archive-browser/v2/server/common"
-	"github.com/jdarthur/groupme-archive-browser/v2/server/models"
+	"github.com/jdarthur/groupme-archive-browser/common"
+	"github.com/jdarthur/groupme-archive-browser/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"strings"
 )
@@ -52,7 +52,13 @@ func (sc SearchController) SearchForText(c *gin.Context) {
 
 	output := make([]models.Message, 0)
 	for _, message := range messages {
-		if strings.Contains(message.MessageText, body.SearchText) {
+		if message.Disavowal != nil && message.Disavowal.Disavow == true {
+			continue // disavowed messages will not show up in search
+		}
+
+		lowerText := strings.ToLower(message.MessageText)
+		lowerSearch := strings.ToLower(body.SearchText)
+		if strings.Contains(lowerText, lowerSearch) {
 			output = append(output, message)
 		}
 	}

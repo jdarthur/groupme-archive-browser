@@ -1,11 +1,12 @@
 import React from 'react';
-import {Breadcrumb, Card, Tabs} from "antd";
+import {Breadcrumb, Card, Skeleton, Tabs} from "antd";
 import {useGetChannelsQuery, useGetMemberQuery} from "../../services/api";
 import {Link, useParams} from "react-router-dom";
 import FriendAliases from "./FriendAliases";
 import FixedSizeImage from "../common/FixedSizeImage";
 import InlineStatistic from "../common/InlineStatistic";
 import FriendAvatars from "./FriendAvatars";
+import {useAuth} from "../../app/store";
 
 const sideBarStyle = {
     paddingTop: 25,
@@ -20,14 +21,11 @@ const sideBarStyle = {
 }
 
 export default function OneMember() {
-
-    const {data: channelsData} = useGetChannelsQuery()
+    const noToken = !useAuth().token
+    const {data: channelsData} = useGetChannelsQuery({skip: noToken})
 
     let { friendId } = useParams();
-
-
-    const {data, isFetching} = useGetMemberQuery(friendId)
-    console.log(data, isFetching)
+    const {data, isFetching} = useGetMemberQuery(friendId, {skip: noToken})
 
     const friend = data?.resource || {}
     const aliases = <div>
@@ -35,6 +33,10 @@ export default function OneMember() {
     </div>
 
     const name = friend.name || ""
+
+    const image = noToken || isFetching ? <Skeleton.Image style={{width: 300, height: 300}} /> : <div>
+        <FixedSizeImage src={friend.image_url} width={300} height={300} alt={`Avatar for ${friend.name}`} />
+    </div>
 
     return (
         <div>
@@ -47,8 +49,8 @@ export default function OneMember() {
                 <div style={{display: "flex"}}>
                     <div style={sideBarStyle}>
                         <div style={{fontSize: "1.5em", paddingBottom: 10, color: "#434343"}}>{friend.name}</div>
-                        <div style={{marginBottom: 10}}>
-                            <FixedSizeImage src={friend.image_url} width={300} height={300} alt={`Avatar for ${friend.name}`} />
+                        <div style={{margin: "0px 10px 10px 0px"}}>
+                            {image}
                         </div>
                         <div style={{marginBottom: 10}}>
                             <InlineStatistic big name={"Channels"} value={friend.channels?.length} />

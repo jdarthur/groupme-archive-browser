@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/jdarthur/groupme-archive-browser/v2/server/common"
-	"github.com/jdarthur/groupme-archive-browser/v2/server/models"
+	"github.com/jdarthur/groupme-archive-browser/common"
+	"github.com/jdarthur/groupme-archive-browser/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

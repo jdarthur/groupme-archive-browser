@@ -5,10 +5,11 @@ import {Breadcrumb, Card} from "antd";
 import InlineStatistic from "../common/InlineStatistic";
 import ChannelMembers from "./ChannelMembers";
 import FixedSizeImage from "../common/FixedSizeImage";
+import {useAuth} from "../../app/store";
 
 export default function AllChannels() {
-    const {data, isFetching} = useGetChannelsQuery()
-    console.log(data, isFetching)
+    const noToken = !useAuth().token
+    const {data, isFetching} = useGetChannelsQuery({skip: noToken})
 
     const channels = data?.resource || []
 
@@ -19,7 +20,7 @@ export default function AllChannels() {
 
         return  <Card key={channel.channel_id} title={<a href={`channels/${channel.channel_id}/messages`}> {channel.name} </a>}
                       size="small"
-                      style={{margin: 20, width: 350, maxWidth: "80vw"}} >
+                      style={{margin: 10, width: 350, maxWidth: "80vw"}} >
             <div style={{display: "flex"}}>
                 <div style={{marginRight: 10}}>
                     <FixedSizeImage width={200} height={200} src={channel.image_url} alt={`Avatar for group "${channel.name}"`} />
@@ -33,7 +34,7 @@ export default function AllChannels() {
                 </div>
             </div>
 
-            <div style={{fontStyle:"italic", paddingTop: 25, fontSize: "1.1em"}}>"{channel.description}"</div>
+            <div style={{fontStyle:"italic", paddingTop: 25, fontSize: "1.1em", textAlign: "center"}} >"{channel.description}"</div>
         </Card>
 
     })

@@ -6,6 +6,7 @@ import SearchTools from "./SearchTools";
 import ListOfMessages from "./ListOfMessages";
 import ShowMoreButton from "./ShowMoreButton";
 import {useGetMessagesDefaultQuery} from "../../services/api";
+import {useAuth} from "../../app/store";
 
 export const DEFAULT_VIEW = "default view"
 export const FROM_THE_TOP = "from the top"
@@ -13,6 +14,8 @@ export const FROM_THE_BOTTOM = "from the bottom"
 export const RANDOM = "random message"
 export const RANDOM_HOT = "random >1 like message"
 export const FROM_A_DATE = "from a date"
+export const CONTROVERSIAL = "controversial"
+export const NIGHT_TIME = "night time"
 
 export const rootMessagesStyle = {
     maxWidth: 'min(700px, 100vw)',
@@ -26,6 +29,8 @@ export default function Messages() {
     let {channelId} = useParams();
     const [params] = useSearchParams();
     const start = params?.get("start")
+
+    const noToken = !useAuth().token
 
     const [viewType, setViewType] = useState(DEFAULT_VIEW)
     const [date, setDate] = useState("")
@@ -68,7 +73,7 @@ export default function Messages() {
         query: start ? "?retainMessageId=true" : ""
     }
 
-    const {data: defaultData, isFetching: isDefaultFetching} = useGetMessagesDefaultQuery(args)
+    const {data: defaultData, isFetching: isDefaultFetching} = useGetMessagesDefaultQuery(args, {skip: noToken})
 
     const prependMessages = (listOfMessages) => {
         const x = document.getElementById("messages-root")
@@ -91,31 +96,20 @@ export default function Messages() {
         setMessagesAfter([])
     }
 
-    const clickFrom = (type) => {
-        clearBeforeAfter()
-        setViewType(type)
-    }
-
-    const clickRandom = (hot) => {
-        clearBeforeAfter()
-
-        if ((hot === true && viewType === RANDOM_HOT) ||
-            (hot === false && viewType === RANDOM)) {
-            // set this flag to trigger another random pull in
-            // the useEffect method in <MessagesView />
-            setPrimaryMessages([])
-            setValid(false)
-        }
-
-        setViewType(hot ? RANDOM_HOT : RANDOM)
-    }
-
     const clickDate = (date) => {
         clearBeforeAfter()
         setDate(date)
         if (viewType !== FROM_A_DATE) {
             setViewType(FROM_A_DATE)
         }
+    }
+
+    const clickType = (type) => {
+        clearBeforeAfter()
+        if (viewType === type) {
+            setValid(false)
+        }
+        setViewType(type)
     }
 
     let view = <MessagesFetcher
@@ -130,9 +124,9 @@ export default function Messages() {
         setValid={setValid}
     />
 
-    const middleData = (start && viewType === DEFAULT_VIEW) ? [...(defaultData?.resource || [])] : [...primaryMessages]
+    const middleData = (viewType === DEFAULT_VIEW) ? [...(defaultData?.resource || [])] : [...primaryMessages]
 
-    const fetching = start && viewType === DEFAULT_VIEW ? isDefaultFetching : isFetching
+    const fetching = (viewType === DEFAULT_VIEW) ? isDefaultFetching : isFetching
 
     const firstMessageId = getFirstMessageId(messagesBefore, middleData, viewType)
     const lastMessageId = getLastMessageId(messagesAfter, middleData, view)
@@ -142,7 +136,9 @@ export default function Messages() {
 
 
     return <div style={rootMessagesStyle}>
-        <SearchTools clickFrom={clickFrom} clickRandom={clickRandom} setDate={clickDate}/>
+        <SearchTools clickType={clickType}
+                     setDate={clickDate} />
+
         {view}
 
         <ListOfMessages messages={allMessages} isFetching={fetching}
@@ -150,13 +146,15 @@ export default function Messages() {
                             <ShowMoreButton addMessagesBefore={prependMessages}
                                             messageId={firstMessageId}
                                             isFetching={fetching}
-                                            before/> :
+                                            before key={"show-more-before"}/> :
                             null}
 
                         showMoreAfter={showMessagesAfterButton ?
                             <ShowMoreButton addMessagesAfter={appendMessages}
                                             messageId={lastMessageId}
-                                            isFetching={fetching}/> :
+                                            isFetching={fetching}
+                                            key={"show-more-after"}
+                            /> :
                             null}/>
 
         <div style={{margin: 5}}/>

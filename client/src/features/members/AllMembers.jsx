@@ -3,29 +3,32 @@ import {useGetMembersQuery} from "../../services/api";
 import {Breadcrumb, Card, Spin} from "antd";
 import InlineStatistic from "../common/InlineStatistic";
 import FixedSizeImage from "../common/FixedSizeImage";
+import {useAuth} from "../../app/store";
 
 export default function AllMembers() {
-    const {data, isFetching} = useGetMembersQuery()
-    console.log(data, isFetching)
+    const noToken = !useAuth().token
+    const {data, isFetching} = useGetMembersQuery(undefined, {skip: noToken})
 
     const friends = data?.resource || []
-
     const cards = friends.map((friend, i) => {
-            return  <Card title={<a href={`friends/${friend.user_id}`}> {friend.name} </a>}
-                          size="small"
-                          style={{margin: 10, width: 325}} >
+            return <Card title={<a href={`friends/${friend.user_id}`}> {friend.name} </a>}
+                         size="small"
+                         style={{margin: 10, width: 325}}
+                         key={friend.user_id}>
                 <div style={{display: "flex"}}>
                     <div style={{marginRight: 10}}>
-                        <FixedSizeImage width={200} height={200} src={friend.image_url} alt={`Avatar for ${friend.name}`} />
+                        <FixedSizeImage width={200} height={200} src={friend.image_url} alt={`Avatar for ${friend.name}`}/>
                     </div>
-                    {/*<img src={friend.image_url} style={centeredCropped} alt={"Group avatar"}/>*/}
-                    <div style={{display: "flex", flexDirection: "column", alignItems: "flex-start", flex: "1", justifyContent: "space-between"}}>
-                    <InlineStatistic name={"Channels"} value={friend.channels.length} />
-                    <InlineStatistic name={"Aliases"} value={friend.aliases.length} />
-                    <InlineStatistic name={"Posts"} value={friend.message_count} />
-                    {/*<InlineStatistic name={"Another thing"} value={1234} noMargin={true} />*/}
-                    {/*    <ChannelStat name={"Members"} value={<ChannelMembers members={channel.members} />} />*/}
-                    {/*    <ChannelStat name={"Created"} value={displayDate} />*/}
+                    <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        flex: "1",
+                        justifyContent: "space-between"
+                    }}>
+                        <InlineStatistic name={"Channels"} value={friend.channels.length}/>
+                        <InlineStatistic name={"Aliases"} value={friend.aliases.length}/>
+                        <InlineStatistic name={"Posts"} value={friend.message_count}/>
                     </div>
                 </div>
 
@@ -36,8 +39,8 @@ export default function AllMembers() {
     )
 
     return (
-        <div style={{padding: 10}} >
-            <Breadcrumb >
+        <div style={{padding: 10}}>
+            <Breadcrumb>
                 <Breadcrumb.Item>Home</Breadcrumb.Item>
                 <Breadcrumb.Item>Friends</Breadcrumb.Item>
             </Breadcrumb>

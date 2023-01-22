@@ -4,17 +4,21 @@ import AlignedIconAndText from "./AlignedIconAndText";
 
 //I Hate Ant Design So Much Sometimes
 
-export default function SimpleButtonWithIconAndCorrectlyAlignedText(props) {
+export default function SimpleButtonWithIconAndCorrectlyAlignedText({style, loading, onClick, disabled, icon, text, type}) {
 
     const baseStyle = {
         padding: "0px 10px"
     }
-    const style = {
+    const s = {
         ...baseStyle,
-        ...(props.style || {})
+        ...(style || {})
     }
 
-    return <Button onClick={props.onClick} style={style}>
-        <AlignedIconAndText icon={props.icon} text={props.text}/>
+    return <Button onClick={onClick}
+                   style={s}
+                   loading={loading}
+                   type={type}
+                   disabled={disabled} >
+        <AlignedIconAndText icon={icon} text={text}/>
     </Button>
 }

@@ -49,6 +49,18 @@ func (a ApiError400) Code() int {
 	return http.StatusBadRequest
 }
 
+type ApiError404 struct {
+	Message string
+}
+
+func (a ApiError404) Error() string {
+	return a.Message
+}
+
+func (a ApiError404) Code() int {
+	return http.StatusNotFound
+}
+
 func ApiErrorf400(format string, e ...interface{}) ApiError400 {
 	return ApiError400{Message: fmt.Sprintf(format, e...)}
 }

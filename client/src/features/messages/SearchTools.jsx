@@ -1,14 +1,14 @@
-import React, {useState} from 'react';
-import {Button, Collapse, DatePicker} from "antd";
+import React from 'react';
+import {Collapse, DatePicker} from "antd";
 import {
     ToolOutlined,
     ArrowUpOutlined,
     ArrowDownOutlined,
     RetweetOutlined,
     FireOutlined,
-    CalendarOutlined
+    WarningOutlined, StarOutlined
 } from "@ant-design/icons"
-import {FROM_THE_BOTTOM, FROM_THE_TOP} from "./Messages";
+import {CONTROVERSIAL, FROM_THE_BOTTOM, FROM_THE_TOP, NIGHT_TIME, RANDOM, RANDOM_HOT} from "./Messages";
 import AlignedIconAndText from "../common/AlignedIconAndText";
 import SimpleButtonWithIconAndCorrectlyAlignedText from "../common/SimpleButtonWithIconAndCorrectlyAlignedText";
 
@@ -26,23 +26,33 @@ export default function SearchTools(props) {
             <div style={{padding: 5, display: "flex", flexWrap: "wrap", gap: 5}}>
                 <SimpleButtonWithIconAndCorrectlyAlignedText
                     icon={<ArrowUpOutlined />}
-                    text={"Start from the top"}
-                    onClick={() => props.clickFrom(FROM_THE_TOP)} />
+                    text={"From the top"}
+                    onClick={() => props.clickType(FROM_THE_TOP)} />
 
                 <SimpleButtonWithIconAndCorrectlyAlignedText
                     icon={<ArrowDownOutlined />}
-                    text={"Start from the bottom"}
-                    onClick={() => props.clickFrom(FROM_THE_BOTTOM)} />
+                    text={"From the bottom"}
+                    onClick={() => props.clickType(FROM_THE_BOTTOM)} />
 
                 <SimpleButtonWithIconAndCorrectlyAlignedText
                     icon={<RetweetOutlined />}
                     text={"Random"}
-                    onClick={() => props.clickRandom(false)} />
+                    onClick={() => props.clickType(RANDOM)} />
 
                 <SimpleButtonWithIconAndCorrectlyAlignedText
                     icon={<FireOutlined />}
                     text={"Hot"}
-                    onClick={() => props.clickRandom(true)} />
+                    onClick={() => props.clickType(RANDOM_HOT)} />
+
+                <SimpleButtonWithIconAndCorrectlyAlignedText
+                    icon={<WarningOutlined />}
+                    text={"Controversial"}
+                    onClick={() => props.clickType(CONTROVERSIAL)} />
+
+                <SimpleButtonWithIconAndCorrectlyAlignedText
+                    icon={<StarOutlined />}
+                    text={"Nighttime"}
+                    onClick={() => props.clickType(NIGHT_TIME)} />
 
                 <DatePicker placeholder={"From a date"} onChange={onChange} />
 

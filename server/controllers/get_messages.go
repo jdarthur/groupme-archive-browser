@@ -3,8 +3,8 @@ package controllers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/jdarthur/groupme-archive-browser/v2/server/common"
-	"github.com/jdarthur/groupme-archive-browser/v2/server/models"
+	"github.com/jdarthur/groupme-archive-browser/common"
+	"github.com/jdarthur/groupme-archive-browser/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"math/rand"
@@ -45,6 +45,32 @@ func (gmc GetMessagesController) GetAllMessages(c *gin.Context) {
 	}
 
 	common.RespondSuccess(c, messages, len(messages), false)
+}
+
+func (gmc GetMessagesController) GetOneMessage(c *gin.Context) {
+
+	messageIdFromPath := c.Param("messageId")
+	messageId, err := primitive.ObjectIDFromHex(messageIdFromPath)
+	if err != nil {
+		e := common.ApiErrorf400("Invalid message ID from path: %s", messageIdFromPath)
+		common.RespondWithError(c, e)
+		return
+	}
+
+	message := models.Message{}
+	err = common.GetOneById(models.MessagesCollection(), messageId, &message)
+	if err != nil {
+		common.Respond500(c, err)
+		return
+	}
+
+	if message.MessageId.IsZero() {
+		apiErr := common.ApiError404{Message: fmt.Sprintf("Message with ID %s not found", messageId.Hex())}
+		common.RespondWithError(c, apiErr)
+		return
+	}
+
+	common.RespondSuccess(c, message, 1, false)
 }
 
 func (gmc GetMessagesController) GetMessagesAround(c *gin.Context) {
@@ -126,41 +152,129 @@ func (gmc GetMessagesController) FromRandomMessage(c *gin.Context) {
 		return
 	}
 
-	rand.Seed(time.Now().UnixNano())
-
-	var message models.Message
-	var index = 0
 	if hot {
-		fmt.Println("hot messages only")
-		// get a random message that has > 1 like
 		hotMessages := make([]models.Message, 0)
+
+		// get a random message that has > 1 like
 		for _, message := range messages {
 			if len(message.LikedBy) > 1 {
 				hotMessages = append(hotMessages, message)
 			}
 		}
-		index = rand.Intn(len(hotMessages) - 1)
-		message = hotMessages[index]
-
-	} else {
-		index = rand.Intn(len(messages) - 1)
-		message = messages[index]
+		messages = hotMessages
 	}
 
+	fromRandomMessage(c, messages)
+}
+
+func fromRandomMessage(c *gin.Context, allMessages []models.Message) {
+	rand.Seed(time.Now().UnixNano())
+
+	fmt.Printf("choosing random message from list of size %d\n", len(allMessages))
+
+	var message models.Message
+	var index = 0
+
+	index = rand.Intn(len(allMessages) - 1)
+	message = allMessages[index]
+
 	limit, err1 := limitFromQuery(c, 100)
-	if err != nil {
+	if err1 != nil {
 		common.RespondWithError(c, err1)
 		return
 	}
 
-	isFirstMessage := (!hot && index == 0) || (hot && (message.MessageId == messages[0].MessageId))
+	isFirst, err := isFirstOrLastMessage(message)
+	if err != nil {
+		common.Respond500(c, err)
+		return
+	}
 
-	output, err := getMessagesAround(message, limit, isFirstMessage, true, c.Query("before") == "true")
+	output, err := getMessagesAround(message, limit, isFirst, true, c.Query("before") == "true")
 	if err != nil {
 		common.Respond500(c, err)
 	} else {
 		common.RespondSuccess(c, output, len(output), false)
 	}
+}
+
+var ControversialTimePeriod = 30 * time.Minute
+var ControversialThreshold = 50 // consecutive messages in ControversialTimePeriod to mark a message "controversial"
+
+func (gmc GetMessagesController) MostControversial(c *gin.Context) {
+
+	channelIdFromPath := c.Param("channelId")
+	channelId, err := primitive.ObjectIDFromHex(channelIdFromPath)
+	if err != nil {
+		e := common.ApiErrorf400("Invalid channel ID from path: %s", channelIdFromPath)
+		common.RespondWithError(c, e)
+		return
+	}
+
+	controversial := make([]models.Message, 0)
+
+	messages, err := getMessagesWithLimit(channelId, -1, false)
+	if err != nil {
+		common.Respond500(c, err)
+		return
+	}
+
+	for i, message := range messages {
+		if message.Disavowal != nil && message.Disavowal.Disavow == true {
+			continue
+		}
+
+		if count := messageCountInControversialPeriod(messages, i, message); count > ControversialThreshold {
+			fmt.Printf("message count for controversial message %s: %d\n", message.MessageId.Hex(), count)
+			controversial = append(controversial, message)
+		}
+	}
+
+	fmt.Println("controversial message count: ", len(controversial))
+	fromRandomMessage(c, controversial)
+}
+
+func (gmc GetMessagesController) Nighttime(c *gin.Context) {
+
+	channelIdFromPath := c.Param("channelId")
+	channelId, err := primitive.ObjectIDFromHex(channelIdFromPath)
+	if err != nil {
+		e := common.ApiErrorf400("Invalid channel ID from path: %s", channelIdFromPath)
+		common.RespondWithError(c, e)
+		return
+	}
+
+	nighttime := make([]models.Message, 0)
+
+	messages, err := getMessagesWithLimit(channelId, -1, false)
+	if err != nil {
+		common.Respond500(c, err)
+		return
+	}
+
+	location, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, message := range messages {
+		if message.Date.In(location).Hour() > 22 || message.Date.In(location).Hour() < 5 {
+			nighttime = append(nighttime, message)
+		}
+	}
+
+	fromRandomMessage(c, nighttime)
+}
+
+func messageCountInControversialPeriod(allMessages []models.Message, startIndex int, startMessage models.Message) int {
+	remainingMessages := len(allMessages) - startIndex - 1
+	for i := 1; i < remainingMessages; i++ {
+		message := allMessages[i+startIndex]
+		if startMessage.Date.Sub(message.Date) > ControversialTimePeriod {
+			return i
+		}
+	}
+	return -1
 }
 
 func (gmc GetMessagesController) FromDate(c *gin.Context) {
@@ -242,7 +356,7 @@ func (gmc GetMessagesController) GetContext(c *gin.Context) {
 	common.RespondSuccess(c, output, len(output), false)
 }
 
-func limitFromQuery(c *gin.Context, defaultValue int64) (int64, common.ApiError400) {
+func limitFromQuery(c *gin.Context, defaultValue int64) (int64, common.ApiError) {
 	l := c.Query("limit")
 	if l != "" {
 		limit, err := strconv.Atoi(l)
@@ -250,9 +364,9 @@ func limitFromQuery(c *gin.Context, defaultValue int64) (int64, common.ApiError4
 			e := common.ApiErrorf400("Invalid limit from query: %s", limitFromQuery)
 			return -1, e
 		}
-		return int64(limit), common.ApiError400{}
+		return int64(limit), nil
 	} else {
-		return defaultValue, common.ApiError400{}
+		return defaultValue, nil
 	}
 }
 

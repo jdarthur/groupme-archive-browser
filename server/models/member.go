@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/jdarthur/groupme-archive-browser/v2/server/common"
+	"github.com/jdarthur/groupme-archive-browser/common"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
@@ -15,6 +15,7 @@ type Member struct {
 	Aliases         []Alias            `json:"aliases" bson:"aliases"`
 	Channels        []string           `json:"channels" bson:"channels"`
 	MessageCount    int64              `json:"message_count" bson:"-"`
+	Auth0Sub        string             `json:"auth0_sub" bson:"auth0_sub"`
 }
 
 type Alias struct {

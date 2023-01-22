@@ -3,7 +3,7 @@ package models
 import (
 	"context"
 	"fmt"
-	"github.com/jdarthur/groupme-archive-browser/v2/server/common"
+	"github.com/jdarthur/groupme-archive-browser/common"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,6 +22,13 @@ type Message struct {
 	Date               time.Time          `json:"date" bson:"date"`                               // when this message was posted
 	AvatarUrl          string             `json:"avatar_url" bson:"avatar_url"`                   // URL of poster's avi at the time of the post
 	EndOfTheLine       bool               `json:"end_of_the_line" bson:"-"`                       // Is this message the first or last message for a channel
+	Disavowal          *Disavowal         `json:"disavowal" bson:"disavowal"`                     // User can disavow their messages after-the-fact, but not delete
+}
+
+type Disavowal struct {
+	Disavow   bool      `json:"disavow"`    // true to disavow, false to avow
+	Comment   string    `json:"comment"`    // add a message to your disavowal
+	CreatedAt time.Time `json:"created_at"` // time that user disavowed or avowed this message
 }
 
 func (m *Message) ID() primitive.ObjectID {
@@ -70,7 +77,7 @@ func DateIndexExists() (bool, error) {
 	}
 
 	var result []bson.M
-	if err = cursor.All(context.TODO(), &result); err != nil {
+	if err = cursor.All(ctx, &result); err != nil {
 		return false, err
 	}
 

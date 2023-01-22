@@ -3,3 +3,15 @@ span {
     display: inline-flex;
     align-items: center;
 }
+
+.logo {
+    /* height: 32px; */
+    float: left;
+    background: rgba(80, 80, 80);
+    margin: 16px;
+    display: flex;
+    align-items: center;
+    font-style: italic;
+
+    color: #777777;
+}

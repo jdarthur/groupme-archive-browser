@@ -2,8 +2,8 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/jdarthur/groupme-archive-browser/v2/server/common"
-	"github.com/jdarthur/groupme-archive-browser/v2/server/models"
+	"github.com/jdarthur/groupme-archive-browser/common"
+	"github.com/jdarthur/groupme-archive-browser/models"
 	"go.mongodb.org/mongo-driver/bson"
 )
 

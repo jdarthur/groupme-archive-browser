@@ -9,7 +9,6 @@ export default function ShowMoreButton(props) {
 
     const onClick = async () => {
         if (props.messageId === null) {
-            console.log("message ID is null")
             return
         }
 

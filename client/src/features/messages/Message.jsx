@@ -1,77 +1,90 @@
-import React from 'react';
-import {Avatar, Image} from "antd";
+import React, {memo} from 'react';
+import {Avatar, Button, Image} from "antd";
 import PosterIdentity from "./PosterIdentity";
 import LikeCount from "./LikeCount";
+import {useAuth0} from "@auth0/auth0-react";
+import Disavow from "./Disavow";
+import DisavowTag from "./DisavowTag";
+import DateTime from "../common/DateTime";
+import PreMessageTimestamp from "./PreMessageTimestamp";
+import {useGetMembersQuery} from "../../services/api";
+import {useAuth} from "../../app/store";
+import ShareMessage from "./ShareMessage";
+import CreateHighlight from "./CreateHighlight";
 
-const MILLISECONDS_BETWEEN_MESSAGES_TO_SHOW_DATE_AGAIN = 1800000
 
-export default function Message(props) {
+export function Message({ date, previous_date, previous_message_id,
+                   user_id, hideTopDate, name, attachments,
+                   channelId, avatar_url, message_id, text,
+                   disavowal, setOpen, open, liked_by, contextButton,
+                   previous_user_id, end_of_the_line, color }) {
 
-    const createDate = Date.parse(props.date)
+    const noToken = !useAuth().token
+    const {data: members} = useGetMembersQuery(undefined, {skip: noToken})
 
-    const dateBefore = Date.parse(props.previousMessage?.date || 0)
-    const timeSincePreviousPost = createDate - dateBefore
-    const hideDate = (timeSincePreviousPost < MILLISECONDS_BETWEEN_MESSAGES_TO_SHOW_DATE_AGAIN)
+    const {user} = useAuth0()
+    let sub = null
+    if (user) {
+        sub = user.sub
+    }
 
-    const fullDate = new Date(createDate).toLocaleString()
-    const date = hideDate ? new Date(createDate).toLocaleTimeString() : fullDate
+    const fullDate = <DateTime date={date} full />
+    const time = <DateTime date={date} />
 
-    const isSystem = props.user_id === "system"
+    const isSystem = user_id === "system"
 
-    let rootColor = "black"
-    let background = "white"
+    let rootColor = color || "black"
     let paddingTop = 5
     let paddingBottom = 5
     if (isSystem) {
         rootColor = "#595959"
-        background = "#f0f0f0"
         paddingTop = 10
         paddingBottom = 10
     }
 
+    const myPost = postedByMe(members?.resource || [], user_id, sub)
+
     const style = {
-        // display: "flex",
         paddingBottom: paddingBottom,
         paddingTop: paddingTop,
         fontFamily: "Arial, Helvetica, sans-serif",
         color: rootColor,
-        background: props.open ? "#f5f5f5" : background,
+        background: myPost ? "#e6f7ff" : "",
         width: '100%',
     }
 
+    const needFullDateInline = hideTopDate && !previous_message_id
+    const datetime = needFullDateInline ? fullDate : time
+
     const userAndDate = <div style={{color: "#8c8c8c", fontSize: "0.8em", marginBottom: 5}}>
-        <PosterIdentity members={props.members?.resource} userId={props.user_id} name={props.name}/>
-        <span>{date}</span>
+        <PosterIdentity members={members?.resource} userId={user_id} name={name}/>
+        <span>{datetime}</span>
     </div>
 
-    const image = renderImage(props.attachments)
+    const image = renderImage(attachments)
 
     const avatar = isSystem ? <div style={{width: 40}}/> : <div>
-        <Avatar src={props.avatar_url} size={"large"}/>
+        <Avatar src={avatar_url} size={"large"} style={{marginLeft: 5}}/>
     </div>
 
-    const showLine = (!hideDate && (props.previousMessage?.user_id !== "system"))
+    const textRender = renderTextWithMentionsAndUrlClickable(text,
+        attachments, members?.resource || [],
+        date, channelId, message_id)
 
-    const topStyle = {
-        color: "#8c8c8c",
-        fontSize: "0.8em",
-        textAlign: "center",
-        padding: showLine ? 20 : 0,
-        borderTop: showLine && props.previousMessage?.message_id ? "1px solid #f0f0f0" : "",
-        marginTop: showLine ? 10 : 0
-    }
-
-    const text = renderTextWithMentionsAndUrlClickable(props.text,
-        props.attachments, props.members?.resource || [],
-        props.date, props.channelId)
+    const avow = myPost ? <Disavow message_id={message_id} existing={disavowal} /> : null
+    const share = <ShareMessage message_id={message_id} channelId={channelId} />
+    const highlight = <CreateHighlight message_id={message_id} />
 
     return <div>
-        <div style={topStyle}>
-            {!hideDate ? fullDate : null}
-        </div>
+        <PreMessageTimestamp date={date}
+                             previous_message_id={previous_message_id}
+                             previous_date={previous_date}
+                             previous_user_id={previous_user_id}
+                             hideTopDate={hideTopDate}
+                             user_id={user_id}
+                             end_of_the_line={end_of_the_line} />
 
         <div style={style}>
-
             <div style={{display: "flex"}}>
                 {avatar}
                 <div style={{
@@ -88,27 +101,28 @@ export default function Message(props) {
                             textAlign: "left",
                             paddingRight: "1em",
                             flex: 1,
-                            fontSize: isSystem ? "0.8em" : "1em"
-                        }} onClick={props.setOpen}>
-                            {text}
+                            fontSize: isSystem ? "0.8em" : "1em",
+                        }} onClick={() => setOpen(message_id)}>
+                            {textRender}
                             <div style={{margin: image ? 5 : 0}}/>
                             {image}
-                            <div style={{color: "#bfbfbf", fontSize: "0.8em", marginTop: props.open ? 10 : 0}}>
-                                {props.open ? fullDate : null}
+                            <div style={{color: "#bfbfbf", fontSize: "0.8em", marginTop: open ? 10 : 0}}>
+                                {/*{props.open ? fullDate : null}*/}
+                                {open ? avow : null}
+                                {open ? share : null}
+                                {open ? highlight : null}
                             </div>
                         </div>
 
                         <span style={{position: "relative"}}>
-                            <LikeCount likes={(props.liked_by || [])} members={props.members} date={props.date}/>
+                            <LikeCount likes={(liked_by || [])} members={members} date={date}/>
                             <span style={{position: "absolute", top: 0, right: 0, transform: "translate(100%, -25%)"}}>
-                                {props.contextButton}
+                                {contextButton}
                             </span>
 
                         </span>
-
-
                     </div>
-
+                    <DisavowTag name={name} disavowal={disavowal} />
                 </div>
 
             </div>
@@ -119,9 +133,10 @@ export default function Message(props) {
 }
 
 function renderImage(attachments) {
-    if (attachments.length === 0) {
+    if (!attachments || attachments?.length === 0) {
         return null
     }
+
     let type = null
     let url = null
     for (let i = 0; i < attachments[0].length; i++) {
@@ -141,13 +156,15 @@ function renderImage(attachments) {
     }
 
     if (type === "mentions")
-
         return null
 }
 
-function renderWithUrlClickable(messageText) {
-    const splitVersion = messageText.replace("\n", " ")
-    const words = splitVersion.split(" ")
+function renderWithUrlClickable(messageText, messageId) {
+    if (!messageText || !messageId) {
+        return null
+    }
+
+    const words = messageText.split(" ")
     const content = []
     let running_string = ""
     for (let i = 0; i < words.length; i++) {
@@ -155,24 +172,24 @@ function renderWithUrlClickable(messageText) {
         if (word.includes("http://") || word.includes("https://")) {
             //console.log("Message has url: ", word)
             if (running_string.length > 0) {
-                content.push(<div>{running_string}</div>)
+                content.push(<div key={`${messageId}-text-${i}`}>{running_string}</div>)
             }
 
-            content.push(<a href={word} target={"_blank"}> {word} </a>)
+            content.push(<a href={word} key={`${messageId}-url-${i}`} target={"_blank"}> {word} </a>)
             running_string = ""
         } else {
             running_string += word + " "
         }
     }
     if (running_string.length > 0) {
-        content.push(running_string)
+        content.push(lineBreakRawText(running_string))
     }
     return <div>
         {content}
     </div>
 }
 
-function renderTextWithMentionsAndUrlClickable(messageText, attachments, allMembers, postingDate, channelId) {
+function renderTextWithMentionsAndUrlClickable(messageText, attachments, allMembers, postingDate, channelId, messageId) {
 
     let chunks = []
     const a = attachments || []
@@ -197,8 +214,7 @@ function renderTextWithMentionsAndUrlClickable(messageText, attachments, allMemb
             const map = {}
             for (let i = 0; i < userIds.length; i++) {
                 const id = userIds[i]
-                const nickname = getUsersCurrentNickname(id, allMembers, postingDate, channelId)
-                map[id] = nickname
+                map[id] = getUsersCurrentNickname(id, allMembers, postingDate, channelId)
             }
 
             const order = getOrderOfMentions(messageText, map)
@@ -206,16 +222,20 @@ function renderTextWithMentionsAndUrlClickable(messageText, attachments, allMemb
             for (let i = 0; i < order.length; i++) {
                 const nickname = order[i].nickName
                 message = messageText.replace(`@${nickname}`, "")
-                chunks.push(<PosterIdentity members={allMembers} userId={order[i].userId} name={`@${nickname}`} blue/>)
+                chunks.push(<PosterIdentity key={order[i].userId} members={allMembers} userId={order[i].userId} name={`@${nickname}`} blue/>)
             }
 
-            chunks.push(message)
+            chunks.push(<span key={"message-text-"}>{lineBreakRawText(message)}</span>)
+        }
+
+        if (type === "event") {
+            return messageText
         }
 
         return chunks
 
     } else {
-        return renderWithUrlClickable(messageText)
+        return renderWithUrlClickable(messageText, messageId)
     }
 }
 
@@ -264,3 +284,42 @@ function getOrderOfMentions(messageText, users) {
 
     return output
 }
+
+function postedByMe(members, targetMemberId, targetSub) {
+    for (let i = 0; i < members.length; i++) {
+        const thisUserId = members[i].archive_member_id
+        const thisSub = members[i].auth0_sub
+        if (thisUserId === targetMemberId && thisSub === targetSub) {
+            return true
+        }
+    }
+    return false
+}
+
+function lineBreakRawText(message) {
+    if (!message) {
+        return null
+    }
+    const segments = message.split("\n")
+    if (segments.length > 1) {
+        console.log(segments)
+    }
+
+    return segments.map((part) => <div>
+        {part}
+    </div>)
+}
+
+function isMessageEqual(oldProps, newProps) {
+    if (oldProps.message_id !== newProps.message_id) {
+        console.log(`message_id ${oldProps.message_id} -> ${newProps.message_id}`)
+        return false
+    }
+    if (oldProps.open !== newProps.open) {
+        console.log(`open ${oldProps.open} -> ${newProps.open}`)
+        return false
+    }
+    return true
+}
+
+export const MemoMessage = memo(Message, isMessageEqual);

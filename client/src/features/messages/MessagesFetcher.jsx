@@ -1,8 +1,9 @@
 import React, {useEffect} from 'react';
-import {FROM_A_DATE, FROM_THE_BOTTOM, FROM_THE_TOP, RANDOM, RANDOM_HOT} from "./Messages";
+import {CONTROVERSIAL, FROM_A_DATE, FROM_THE_BOTTOM, FROM_THE_TOP, NIGHT_TIME, RANDOM, RANDOM_HOT} from "./Messages";
 import {
+    useLazyGetControversialMessageQuery,
     useLazyGetMessagesFromDateQuery,
-    useLazyGetMessagesQuery,
+    useLazyGetMessagesQuery, useLazyGetNighttimeQuery,
     useLazyGetRandomMessagesQuery
 } from "../../services/api";
 
@@ -11,6 +12,8 @@ export default function MessagesFetcher(props) {
     const [getFromTopOrBottom] = useLazyGetMessagesQuery()
     const [getRandom] = useLazyGetRandomMessagesQuery()
     const [getFromADate] = useLazyGetMessagesFromDateQuery()
+    const [getControversial] = useLazyGetControversialMessageQuery()
+    const [getNighttime] = useLazyGetNighttimeQuery()
 
     useEffect(() => {
         getMessages(props.type, props.date)
@@ -40,6 +43,10 @@ export default function MessagesFetcher(props) {
             resp = await getRandom(args)
         } else if (type === FROM_A_DATE) {
             resp = await getFromADate(args)
+        } else if (type === CONTROVERSIAL) {
+            resp = await getControversial(args)
+        } else if (type === NIGHT_TIME) {
+            resp = await getNighttime(args)
         }
         else {
             //console.log("Unexpected view type: ", type)

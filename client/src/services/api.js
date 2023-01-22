@@ -1,8 +1,31 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 
-export const api = createApi({
-    reducerPath: 'api',
-    baseQuery: fetchBaseQuery({ }),
+
+export const baseQuery = fetchBaseQuery({
+    prepareHeaders: (headers, {getState}) => {
+        const userToken = getState().auth.token;
+
+        if (userToken) {
+            headers.set('auth0-token', userToken);
+        }
+
+        return headers;
+    },
+});
+
+
+export const mainApi = createApi({
+    reducerPath: 'mainApi',
+    baseQuery: baseQuery,
+    tagTypes: [
+        "channels",
+        "friends",
+        "friend",
+        "messages",
+        "random_messages",
+        "messages_from_id",
+        "messages_from_date"
+    ],
     endpoints: (builder) => ({
         getChannels: builder.query({
             query: () => `/api/channels`,
@@ -25,10 +48,20 @@ export const api = createApi({
             providesTags: ['random_messages']
         }),
         getMessagesFromDate: builder.query({
-            query: (args) => `/api/channels/${args.channelId}/messages/from_date/${args.date}`
+            query: (args) => `/api/channels/${args.channelId}/messages/from_date/${args.date}`,
+            providesTags: ["messages_from_date"]
         }),
         getMessagesFromMessageId: builder.query({
-            query: (args) => `/api/messages/around/${args.messageId}${args.query}`
+            query: (args) => `/api/messages/around/${args.messageId}${args.query}`,
+            providesTags: ["messages_from_id"]
+        }),
+        getControversialMessage: builder.query({
+            query: (args) => `/api/channels/${args.channelId}/messages/controversial`,
+            providesTags: ['random_messages']
+        }),
+        getNighttime: builder.query({
+            query: (args) => `/api/channels/${args.channelId}/messages/nighttime`,
+            providesTags: ["random_messages"]
         }),
         searchMessagesForText: builder.query({
             query: (args) => ({
@@ -38,7 +71,48 @@ export const api = createApi({
             })
         }),
         getMessagesDefault: builder.query({
-            query: (args) => `/api/${args.apiBase}${args.messageId ? args.messageId : args.channelId}/${args.endSegment}${args.query}`
+            query: (args) => `/api${args.apiBase}${args.messageId ? args.messageId : args.channelId}/${args.endSegment}${args.query}`,
+            providesTags: ["messages", "messages_from_id"]
+        }),
+        disavowMessage: builder.mutation({
+            query: (args) => ({
+                url: `/api/messages/disavow/${args.message_id}`,
+                method: "POST",
+                body: args.body,
+            }),
+            invalidatesTags: ["messages", "random_messages", "messages_from_id", "messages_from_date"]
+        }),
+        undisavowMessage: builder.mutation({
+            query: (message_id) => ({
+                url: `/api/messages/undisavow/${message_id}`,
+                method: "POST",
+            }),
+            invalidatesTags: ["messages", "random_messages", "messages_from_id", "messages_from_date"]
+        }),
+        getMemberByAuth0Sub: builder.query({
+            query: (auth0_sub) => `/api/friends/by_sub/${auth0_sub}`,
+            providesTags: ['this_friend']
+        }),
+        getHighlights: builder.query({
+            query: () => `/api/highlights`,
+            providesTags: ['highlights']
+        }),
+        getHighlightComponent: builder.query({
+            query: (args) => `/api/highlight_component/type/${args.type}/from/${args.first_message_id}/through/${args.last_message_id}`,
+        }),
+        getMessageById: builder.query({
+            query: (messageId) => `/api/messages/${messageId}`
+        }),
+        createHighlight: builder.mutation({
+            query: (body) => ({
+                url: `/api/highlights`,
+                method: "POST",
+                body: body
+            }),
+            invalidatesTags: ["highlights"]
+        }),
+        getHighlightById: builder.query({
+            query: (id) => `/api/highlights/${id}`
         }),
     }),
 })
@@ -57,4 +131,14 @@ export const {
     useLazyGetMessagesFromMessageIdQuery,
     useLazySearchMessagesForTextQuery,
     useGetMessagesDefaultQuery,
-} = api
+    useDisavowMessageMutation,
+    useUndisavowMessageMutation,
+    useLazyGetControversialMessageQuery,
+    useLazyGetNighttimeQuery,
+    useGetMemberByAuth0SubQuery,
+    useGetHighlightsQuery,
+    useGetHighlightComponentQuery,
+    useGetMessageByIdQuery,
+    useCreateHighlightMutation,
+    useGetHighlightByIdQuery,
+} = mainApi

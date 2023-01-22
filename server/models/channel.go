@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/jdarthur/groupme-archive-browser/v2/server/common"
+	"github.com/jdarthur/groupme-archive-browser/common"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )

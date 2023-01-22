@@ -2,19 +2,20 @@ import React from 'react';
 import {Breadcrumb, Button, Divider, Input, Tag} from "antd";
 import {useGetChannelsQuery, useGetMembersQuery, useLazySearchMessagesForTextQuery} from "../../services/api";
 import {useNavigate, useParams} from "react-router-dom";
-import Message from "../messages/Message";
-import {ArrowRightOutlined, RightOutlined} from "@ant-design/icons";
-import {listOfMessagesStyle} from "../messages/ListOfMessages";
+import {Message} from "../messages/Message";
+import {ArrowRightOutlined} from "@ant-design/icons";
 import {rootMessagesStyle} from "../messages/Messages";
+import {useAuth} from "../../app/store";
 
 
 export default function ChannelSearch() {
     let {channelId} = useParams();
     let navigate = useNavigate()
 
-    const {data: members} = useGetMembersQuery()
+    const noToken = !useAuth().token
 
-    const {data: channels} = useGetChannelsQuery()
+    const {data: members} = useGetMembersQuery(undefined, {skip: noToken})
+    const {data: channels} = useGetChannelsQuery(undefined, {skip: noToken})
 
     const channelName = getChannelName(channelId, channels?.resource || [])
 
@@ -50,6 +51,7 @@ export default function ChannelSearch() {
                 liked_by={message.liked_by}
                 channelId={message.channel_id}
                 contextButton={contextButton}
+                message_id={message.message_id}
             />
     })
 

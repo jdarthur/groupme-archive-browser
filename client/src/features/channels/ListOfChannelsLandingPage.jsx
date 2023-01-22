@@ -3,9 +3,11 @@ import {Spin} from "antd";
 import {useGetChannelsQuery} from "../../services/api";
 import FixedSizeImage from "../common/FixedSizeImage";
 import {Link} from "react-router-dom";
+import {useAuth} from "../../app/store";
 
 export default function ListOfChannelsLandingPage(props) {
-    const {data, isFetching} = useGetChannelsQuery()
+    const noToken = !useAuth().token
+    const {data, isFetching} = useGetChannelsQuery({skip: noToken})
 
     if (isFetching) {
         return <Spin size={"large"} style={{margin: 50}} />
