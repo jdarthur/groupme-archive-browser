@@ -1,3 +1,4 @@
 **/pkg/*
 server/tmp
 server/.env
+client/cert

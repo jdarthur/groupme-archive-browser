@@ -84,7 +84,7 @@ func initMongoDb() error {
 
 	mongoPort := os.Getenv("MONGO_PORT")
 	if len(mongoPort) == 0 {
-		mongoPort = "27018"
+		mongoPort = "27017"
 	}
 	mongoAddress := "mongodb://" + mongoHost + ":" + mongoPort
 	err := common.OpenDatabaseConnection(mongoAddress)
