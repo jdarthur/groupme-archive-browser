@@ -1,6 +1,6 @@
 import React from 'react';
 import {useGetChannelsQuery} from "../../services/api";
-import {Breadcrumb, Card} from "antd";
+import {Breadcrumb, Card, Spin} from "antd";
 
 import InlineStatistic from "../common/InlineStatistic";
 import ChannelMembers from "./ChannelMembers";
@@ -9,7 +9,11 @@ import {useAuth} from "../../app/store";
 
 export default function AllChannels() {
     const noToken = !useAuth().token
-    const {data, isFetching} = useGetChannelsQuery({skip: noToken})
+    const {data, isFetching} = useGetChannelsQuery(undefined, {skip: noToken})
+
+    if (isFetching) {
+        return <Spin size={"large"}/>
+    }
 
     const channels = data?.resource || []
 

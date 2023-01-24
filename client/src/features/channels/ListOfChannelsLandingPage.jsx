@@ -7,7 +7,7 @@ import {useAuth} from "../../app/store";
 
 export default function ListOfChannelsLandingPage(props) {
     const noToken = !useAuth().token
-    const {data, isFetching} = useGetChannelsQuery({skip: noToken})
+    const {data, isFetching} = useGetChannelsQuery(undefined, {skip: noToken})
 
     if (isFetching) {
         return <Spin size={"large"} style={{margin: 50}} />

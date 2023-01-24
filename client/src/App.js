@@ -17,6 +17,7 @@ import AuthButton from "./features/auth/AuthButton";
 import {FolderOutlined, HighlightOutlined, MessageOutlined, SearchOutlined, TeamOutlined} from "@ant-design/icons";
 import Highlights from "./features/highlights/Highlights";
 import SingleHighlightPage from "./features/highlights/SingleHighlightPage";
+import SubAssignment from "./features/members/SubAssignment";
 
 const {Content, Header, Footer} = Layout;
 
@@ -94,6 +95,7 @@ export default function App() {
                     </Route>
                     <Route index element={defaultView}/>
                     <Route path="*" element={nothingView}/>
+                    <Route path="admin/sub_assignment" element={<SubAssignment />}/>
                 </Route>
             </Routes>
 

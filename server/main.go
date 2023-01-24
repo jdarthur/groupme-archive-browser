@@ -74,6 +74,11 @@ func main() {
 	apiAuth.GET("/highlight_component/type/:type/from/:firstMessageId/through/:lastMessageId", highlightsCtl.GetHighlightComponent)
 	apiAuth.DELETE("/highlights/:highlightId", highlightsCtl.DeleteHighlight)
 
+	subAssignmentCtl := controllers.SubAssignmentController{}
+	if devMode {
+		apiAuth.PUT("/sub_assignment", subAssignmentCtl.UpdateSubAssignment)
+	}
+
 	r.Run() // listen and serve on 0.0.0.0:8080
 }
 

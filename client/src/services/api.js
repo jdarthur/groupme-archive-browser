@@ -121,6 +121,14 @@ export const mainApi = createApi({
             }),
             invalidatesTags: ["highlights"]
         }),
+        updateAuth0Sub: builder.mutation({
+            query: (body) => ({
+                url: `/api/sub_assignment`,
+                method: "PUT",
+                body: body
+            }),
+            invalidatesTags: ["friends"]
+        }),
     }),
 })
 
@@ -149,4 +157,5 @@ export const {
     useCreateHighlightMutation,
     useGetHighlightByIdQuery,
     useDeleteHighlightMutation,
+    useUpdateAuth0SubMutation,
 } = mainApi
