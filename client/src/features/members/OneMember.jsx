@@ -1,5 +1,5 @@
 import React from 'react';
-import {Breadcrumb, Card, Skeleton, Tabs} from "antd";
+import {Breadcrumb, Skeleton, Tabs} from "antd";
 import {useGetChannelsQuery, useGetMemberQuery} from "../../services/api";
 import {Link, useParams} from "react-router-dom";
 import FriendAliases from "./FriendAliases";
@@ -22,7 +22,7 @@ const sideBarStyle = {
 
 export default function OneMember() {
     const noToken = !useAuth().token
-    const {data: channelsData} = useGetChannelsQuery({skip: noToken})
+    const {data: channelsData} = useGetChannelsQuery(undefined, {skip: noToken})
 
     let { friendId } = useParams();
     const {data, isFetching} = useGetMemberQuery(friendId, {skip: noToken})

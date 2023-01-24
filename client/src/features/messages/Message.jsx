@@ -1,5 +1,5 @@
 import React, {memo} from 'react';
-import {Avatar, Button, Image} from "antd";
+import {Avatar, Image} from "antd";
 import PosterIdentity from "./PosterIdentity";
 import LikeCount from "./LikeCount";
 import {useAuth0} from "@auth0/auth0-react";
@@ -175,7 +175,7 @@ function renderWithUrlClickable(messageText, messageId) {
                 content.push(<div key={`${messageId}-text-${i}`}>{running_string}</div>)
             }
 
-            content.push(<a href={word} key={`${messageId}-url-${i}`} target={"_blank"}> {word} </a>)
+            content.push(<a href={word} key={`${messageId}-url-${i}`} target={"_blank"} rel={"noreferrer"}> {word} </a>)
             running_string = ""
         } else {
             running_string += word + " "

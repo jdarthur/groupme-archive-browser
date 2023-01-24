@@ -8,18 +8,23 @@ import {Auth0Provider} from "@auth0/auth0-react";
 import {createRoot} from 'react-dom/client';
 import App from './App';
 
+
 const rootElement = document.getElementById('root');
 const root = createRoot(rootElement);
+
+const domain = process.env.REACT_APP_AUTH0_DOMAIN;
+const audience = process.env.REACT_APP_AUTH0_AUDIENCE
+const clientId = process.env.REACT_APP_AUTH0_CLIENT_ID
 
 root.render(
     <React.StrictMode>
         <Auth0Provider
-            domain="borttrivia.us.auth0.com"
-            clientId="h1lPD3dlRa3f6U7fCKKjTS9FWbv7oDSN"
+            domain={domain}
+            clientId={clientId}
             redirectUri={window.location.origin}
             useRefreshTokens={true}
             cacheLocation="localstorage"
-            audience="https://borttrivia.com/editor"
+            audience={audience}
             scope="openid profile email offline_access read:current_user">
 
             <Provider store={store}>

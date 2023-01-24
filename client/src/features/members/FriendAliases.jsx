@@ -1,6 +1,5 @@
 import React from 'react';
-import InlineStatistic from "../common/InlineStatistic";
-import {Card, Empty, Table} from "antd";
+import {Empty, Table} from "antd";
 
 
 const columns = [

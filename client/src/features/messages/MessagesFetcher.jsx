@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import {CONTROVERSIAL, FROM_A_DATE, FROM_THE_BOTTOM, FROM_THE_TOP, NIGHT_TIME, RANDOM, RANDOM_HOT} from "./Messages";
 import {
     useLazyGetControversialMessageQuery,
@@ -7,7 +7,9 @@ import {
     useLazyGetRandomMessagesQuery
 } from "../../services/api";
 
-export default function MessagesFetcher(props) {
+export default function MessagesFetcher({type, date, setValid, valid, channelId,
+                                         setIsFetching, setShowMessagesBeforeButton,
+                                         setShowMessagesAfterButton, setMainMessagesView}) {
 
     const [getFromTopOrBottom] = useLazyGetMessagesQuery()
     const [getRandom] = useLazyGetRandomMessagesQuery()
@@ -15,14 +17,8 @@ export default function MessagesFetcher(props) {
     const [getControversial] = useLazyGetControversialMessageQuery()
     const [getNighttime] = useLazyGetNighttimeQuery()
 
-    useEffect(() => {
-        getMessages(props.type, props.date)
-        props.setValid(true)
-    }, [props.type, props.date, props.valid]);
-
-    const getMessages = async (type, date) => {
-
-        const args = {channelId: props.channelId}
+    const getMessages = useCallback(async (type, date) => {
+        const args = {channelId: channelId}
         if (type === FROM_THE_BOTTOM) {
             args.query = "?reverse=true"
         } else if (type === FROM_THE_TOP) {
@@ -35,7 +31,7 @@ export default function MessagesFetcher(props) {
             args.date = date
         }
 
-        props.setIsFetching(true)
+        setIsFetching(true)
         let resp = null
         if (type === FROM_THE_TOP || type === FROM_THE_BOTTOM) {
             resp = await getFromTopOrBottom(args)
@@ -59,13 +55,21 @@ export default function MessagesFetcher(props) {
             const data = resp?.data.resource
             //console.log(data)
             if (data?.length > 0) {
-                props.setShowMessagesBeforeButton(!data[0].end_of_the_line)
-                props.setShowMessagesAfterButton(!data[data.length - 1].end_of_the_line)
+                setShowMessagesBeforeButton(!data[0].end_of_the_line)
+                setShowMessagesAfterButton(!data[data.length - 1].end_of_the_line)
             }
-            props.setMainMessagesView(data)
+            setMainMessagesView(data)
         }
-        props.setIsFetching(false)
-    }
+        setIsFetching(false)
+    }, [getNighttime, getFromTopOrBottom, getFromADate, getRandom, getControversial, channelId,
+         setIsFetching, setShowMessagesAfterButton, setShowMessagesBeforeButton, setMainMessagesView])
+
+
+    useEffect(() => {
+        getMessages(type, date)
+        setValid(true)
+    }, [type, date, valid, setValid, getMessages]);
+
 
     return <div/>
 

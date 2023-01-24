@@ -51,7 +51,6 @@ export default function Messages() {
     const [showMessagesAfterButton, setShowMessagesAfterButton] = useState(true)
 
     useLayoutEffect(() => {
-        //this code
         const x = document.getElementById("messages-root")
         if (x) {
             const newScrollHeight = x.scrollHeight
@@ -62,7 +61,7 @@ export default function Messages() {
                 setLastScrollHeight(newScrollHeight)
             }
         }
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [messagesBefore])
 
     const args = {
@@ -137,7 +136,7 @@ export default function Messages() {
 
     return <div style={rootMessagesStyle}>
         <SearchTools clickType={clickType}
-                     setDate={clickDate} />
+                     setDate={clickDate}/>
 
         {view}
 

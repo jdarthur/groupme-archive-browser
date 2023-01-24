@@ -2,3 +2,4 @@
 server/tmp
 server/.env
 client/cert
+client/.env
