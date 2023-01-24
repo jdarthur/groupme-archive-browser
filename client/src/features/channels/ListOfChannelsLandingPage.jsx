@@ -18,7 +18,7 @@ export default function ListOfChannelsLandingPage(props) {
         <div style={{marginRight: 10}}>
             <FixedSizeImage src={channel.image_url} width={100} height={100} />
         </div>
-        <Link to={`/channels/${channel.channel_id}/${props.destination}`} > {channel.name} </Link>
+        <Link to={`/${props.destination}/${channel.channel_id}`}> {channel.name} </Link>
     </span> )
 
     return <div style={{display: "flex", alignItems: "flex-start", padding : 10, flexDirection: "column"}}>

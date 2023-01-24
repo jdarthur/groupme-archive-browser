@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import 'antd/dist/reset.css';
 import './App.css';
 import AllChannels from "./features/channels/AllChannels";
-import {Link, Outlet, Route, Routes} from "react-router-dom";
+import {Link, Outlet, Route, Routes, useLocation} from "react-router-dom";
 
 import {Layout, Menu} from 'antd';
 import AllMembers from "./features/members/AllMembers";
@@ -21,10 +21,19 @@ import SubAssignment from "./features/members/SubAssignment";
 
 const {Content, Header, Footer} = Layout;
 
+const CHANNELS = "channels"
+const FRIENDS = "friends"
+const MESSAGES = "messages"
+const SEARCH = "search"
+const HIGHLIGHTS = "highlights"
+
 export default function App() {
 
     const {getAccessTokenSilently, isLoading: authIsLoading} = useAuth0();
     const dispatch = useDispatch();
+
+    const {pathname} = useLocation()
+    const selectedKeys = [getSelectedMenuItem(pathname)]
 
     useEffect(() => {
         const getEditorJwt = async () => {
@@ -52,20 +61,26 @@ export default function App() {
     return (
         <div style={{height: '100vh', display: "flex", flexDirection: "column"}}>
             <Header>
-                <Menu mode="horizontal" defaultSelectedKeys={["channels"]} theme={"dark"} style={{minWidth: 0, flex: "auto"}}>
-                    <Menu.Item key={"channels"} icon={<FolderOutlined />}>
+                <Menu mode="horizontal"
+                      defaultSelectedKeys={["channels"]}
+                      theme={"dark"}
+                      style={{minWidth: 0, flex: "auto"}}
+                      selectedKeys={selectedKeys}
+                >
+
+                    <Menu.Item key={"channels"} icon={<FolderOutlined/>}>
                         <Link to={"channels"}>Channels</Link>
                     </Menu.Item>
-                    <Menu.Item key={"friends"} icon={<TeamOutlined />}>
+                    <Menu.Item key={"friends"} icon={<TeamOutlined/>}>
                         <Link to={"friends"}>Friends</Link>
                     </Menu.Item>
-                    <Menu.Item key={"messages"} icon={<MessageOutlined />}>
+                    <Menu.Item key={"messages"} icon={<MessageOutlined/>}>
                         <Link to={"messages"}>Messages</Link>
                     </Menu.Item>
-                    <Menu.Item key={"search"} icon={<SearchOutlined />}>
+                    <Menu.Item key={"search"} icon={<SearchOutlined/>}>
                         <Link to={"search"}>Search</Link>
                     </Menu.Item>
-                    <Menu.Item key={"highlights"} icon={<HighlightOutlined />}>
+                    <Menu.Item key={"highlights"} icon={<HighlightOutlined/>}>
                         <Link to={"highlights"}>Highlights</Link>
                     </Menu.Item>
                     <Menu.Item key={"auth"}>
@@ -85,17 +100,17 @@ export default function App() {
                                element={<OneMember/>}/>
                     </Route>
                     <Route path="messages" element={<ListOfChannelsLandingPage destination={"messages"}/>}/>
-                    <Route path="Search" element={<ListOfChannelsLandingPage destination={"search"}/>}/>
-                    <Route path="channels/:channelId/messages" element={<Messages/>}/>
-                    <Route path="channels/:channelId/search" element={<ChannelSearch/>}/>
-                    <Route path="highlights" element={<Outlet />}>
-                        <Route index element={<Highlights />}/>
+                    <Route path="search" element={<ListOfChannelsLandingPage destination={"search"}/>}/>
+                    <Route path="messages/:channelId" element={<Messages/>}/>
+                    <Route path="search/:channelId" element={<ChannelSearch/>}/>
+                    <Route path="highlights" element={<Outlet/>}>
+                        <Route index element={<Highlights/>}/>
                         <Route path=":highlightId"
-                               element={<SingleHighlightPage />}/>
+                               element={<SingleHighlightPage/>}/>
                     </Route>
                     <Route index element={defaultView}/>
                     <Route path="*" element={nothingView}/>
-                    <Route path="admin/sub_assignment" element={<SubAssignment />}/>
+                    <Route path="admin/sub_assignment" element={<SubAssignment/>}/>
                 </Route>
             </Routes>
 
@@ -103,5 +118,23 @@ export default function App() {
             </Footer>
         </div>
     );
+}
+
+function getSelectedMenuItem(path) {
+    if (path.includes(CHANNELS)) {
+        return CHANNELS
+    }
+    if (path.includes(FRIENDS)) {
+        return FRIENDS
+    }
+    if (path.includes(MESSAGES)) {
+        return MESSAGES
+    }
+    if (path.includes(SEARCH)) {
+        return SEARCH
+    }
+    if (path.includes(HIGHLIGHTS)) {
+        return HIGHLIGHTS
+    }
 }
 

@@ -26,7 +26,7 @@ export default function ChannelSearch() {
     }
 
     const goTo = (messageId) => {
-        navigate(`/channels/${channelId}/messages?start=${messageId}`)
+        navigate(`/messages/${channelId}?start=${messageId}`)
     }
 
     const r = results?.data?.resource || []

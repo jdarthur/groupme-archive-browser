@@ -1,11 +1,10 @@
 import React from 'react';
 import {Tag, Tooltip} from "antd";
 
-export default function DisavowTag(props) {
+export default function DisavowTag({disavowal, name}) {
 
-    if (props.disavowal) {
-        const d = props.disavowal
-        console.log(props)
+    if (disavowal) {
+        const d = disavowal
 
         const createDate = Date.parse(d.created_at)
         const date = new Date(createDate).toLocaleDateString()
@@ -13,7 +12,7 @@ export default function DisavowTag(props) {
 
         const verb = d.disavow ? "disavowed" : "reavowed"
 
-        let title = `${props.name} ${verb} this message on ${date} at ${time}`
+        let title = `${name} ${verb} this message on ${date} at ${time}`
         let context = null
         if (d.comment) {
             title += " with the comment: "

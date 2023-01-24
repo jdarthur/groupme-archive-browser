@@ -301,9 +301,6 @@ function lineBreakRawText(message) {
         return null
     }
     const segments = message.split("\n")
-    if (segments.length > 1) {
-        console.log(segments)
-    }
 
     return segments.map((part) => <div>
         {part}
@@ -312,11 +309,9 @@ function lineBreakRawText(message) {
 
 function isMessageEqual(oldProps, newProps) {
     if (oldProps.message_id !== newProps.message_id) {
-        console.log(`message_id ${oldProps.message_id} -> ${newProps.message_id}`)
         return false
     }
     if (oldProps.open !== newProps.open) {
-        console.log(`open ${oldProps.open} -> ${newProps.open}`)
         return false
     }
     return true

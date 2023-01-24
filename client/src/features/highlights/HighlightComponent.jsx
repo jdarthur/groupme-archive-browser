@@ -35,7 +35,7 @@ export default function HighlightComponent({type, first_message_id, last_message
     const channelId = data?.resource[0].channel_id
     const navigate = useNavigate()
     const clickContext = () => {
-        const url = `/channels/${channelId}/messages?start=${first_message_id}`
+        const url = `/messages/${channelId}?start=${first_message_id}`
         navigate(url)
     }
 

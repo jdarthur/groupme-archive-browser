@@ -22,7 +22,7 @@ export default function AllChannels() {
         const createDate = Date.parse(channel.created_at)
         const displayDate = new Date(createDate).toLocaleDateString()
 
-        return  <Card key={channel.channel_id} title={<a href={`channels/${channel.channel_id}/messages`}> {channel.name} </a>}
+        return  <Card key={channel.channel_id} title={<a href={`messages/${channel.channel_id}`}> {channel.name} </a>}
                       size="small"
                       style={{margin: 10, width: 350, maxWidth: "80vw"}} >
             <div style={{display: "flex"}}>
