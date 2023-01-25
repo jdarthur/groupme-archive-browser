@@ -6,6 +6,7 @@ import InlineStatistic from "../common/InlineStatistic";
 import ChannelMembers from "./ChannelMembers";
 import FixedSizeImage from "../common/FixedSizeImage";
 import {useAuth} from "../../app/store";
+import LoginNeeded from "../auth/LoginNeeded";
 
 export default function AllChannels() {
     const noToken = !useAuth().token
@@ -49,7 +50,7 @@ export default function AllChannels() {
                 <Breadcrumb.Item>Channels</Breadcrumb.Item>
             </Breadcrumb>
             <div style={{display: "flex", flexWrap: "wrap"}}>
-                {cards}
+                {noToken ? <LoginNeeded /> : cards}
             </div>
         </div>
     );

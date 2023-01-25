@@ -6,6 +6,7 @@ import {Message} from "../messages/Message";
 import {ArrowRightOutlined} from "@ant-design/icons";
 import {rootMessagesStyle} from "../messages/Messages";
 import {useAuth} from "../../app/store";
+import LoginNeeded from "../auth/LoginNeeded";
 
 
 export default function ChannelSearch() {
@@ -63,13 +64,7 @@ export default function ChannelSearch() {
     const s = {...rootMessagesStyle}
     s.overflowX = "visible"
 
-    return <div>
-        <Breadcrumb style={{paddingTop: 10, paddingLeft: 10}}>
-            <Breadcrumb.Item>Home</Breadcrumb.Item>
-            <Breadcrumb.Item>{channelName}</Breadcrumb.Item>
-            <Breadcrumb.Item>Search</Breadcrumb.Item>
-        </Breadcrumb>
-
+    const content = <div>
         <span style={{display: 'inline-flex', alignItems: "center", paddingTop: 10, paddingLeft: 10}}>
             <Input.Search placeholder="Search"
                           onSearch={onSearch}
@@ -85,6 +80,16 @@ export default function ChannelSearch() {
                 {messageList}
             </div>
         </div>
+    </div>
+
+    return <div>
+        <Breadcrumb style={{paddingTop: 10, paddingLeft: 10}}>
+            <Breadcrumb.Item>Home</Breadcrumb.Item>
+            {channelName ? <Breadcrumb.Item>{channelName}</Breadcrumb.Item> : null}
+            <Breadcrumb.Item>Search</Breadcrumb.Item>
+        </Breadcrumb>
+
+        {noToken ? <LoginNeeded /> : content}
 
     </div>
 

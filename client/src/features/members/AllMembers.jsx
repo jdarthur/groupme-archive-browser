@@ -4,6 +4,7 @@ import {Breadcrumb, Card, Spin} from "antd";
 import InlineStatistic from "../common/InlineStatistic";
 import FixedSizeImage from "../common/FixedSizeImage";
 import {useAuth} from "../../app/store";
+import LoginNeeded from "../auth/LoginNeeded";
 
 export default function AllMembers() {
     const noToken = !useAuth().token
@@ -46,7 +47,7 @@ export default function AllMembers() {
             </Breadcrumb>
             {isFetching ? <Spin size={"large"} style={{padding: 100}}/> :
                 <div style={{display: "flex", flexWrap: "wrap"}}>
-                    {cards}
+                    {noToken ? <LoginNeeded />: cards}
                 </div>
             }
         </div>

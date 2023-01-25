@@ -7,6 +7,7 @@ import ListOfMessages from "./ListOfMessages";
 import ShowMoreButton from "./ShowMoreButton";
 import {useGetMessagesDefaultQuery} from "../../services/api";
 import {useAuth} from "../../app/store";
+import LoginNeeded from "../auth/LoginNeeded";
 
 export const DEFAULT_VIEW = "default view"
 export const FROM_THE_TOP = "from the top"
@@ -138,8 +139,8 @@ export default function Messages() {
         <SearchTools clickType={clickType}
                      setDate={clickDate}/>
 
+        {noToken ? <LoginNeeded /> : null}
         {view}
-
         <ListOfMessages messages={allMessages} isFetching={fetching}
                         showMoreBefore={showMessagesBeforeButton ?
                             <ShowMoreButton addMessagesBefore={prependMessages}
