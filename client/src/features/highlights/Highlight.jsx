@@ -41,7 +41,7 @@ export default function Highlight({members, member_id, created_at, title, compon
     return (
         <Card title={t}
               bodyStyle={{padding: 0}}
-              style={{margin: 10, maxWidth: "min(500px, 70vw)"}}>
+              style={{margin: 10, maxWidth: "min(500px, 90vw)"}}>
             {c}
         </Card>
     );
