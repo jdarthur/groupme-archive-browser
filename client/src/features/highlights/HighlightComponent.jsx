@@ -73,6 +73,7 @@ export default function HighlightComponent({
                 channelId={message.channel_id}
                 disavowal={message.disavowal}
                 end_of_the_line={message.end_of_the_line}
+                hideTopDate={!expanded}
             />
         }
     )
