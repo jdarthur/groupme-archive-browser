@@ -53,7 +53,7 @@ export default function OneMember() {
                             {image}
                         </div>
                         <div style={{marginBottom: 10}}>
-                            <InlineStatistic big name={"Channels"} value={friend.channels?.length} />
+                            <InlineStatistic big name={"Channels"} value={friend.channels?.length || 0} />
                         </div>
                         <div style={{marginBottom: 10}}>
                             <InlineStatistic big name={"First Seen"} value={firstSeen(friend.aliases || [])} />

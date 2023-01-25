@@ -27,7 +27,7 @@ export default function AllMembers() {
                         flex: "1",
                         justifyContent: "space-between"
                     }}>
-                        <InlineStatistic name={"Channels"} value={friend.channels.length}/>
+                        <InlineStatistic name={"Channels"} value={friend.channels?.length || 0}/>
                         <InlineStatistic name={"Aliases"} value={friend.aliases.length}/>
                         <InlineStatistic name={"Posts"} value={friend.message_count}/>
                     </div>

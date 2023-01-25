@@ -76,6 +76,15 @@ func getMessagesWithWhereAndLimit(channelId primitive.ObjectID, where bson.M, li
 	return messages, err
 }
 
+func reverseMessagesJson(input []models.ArchiveMessage) []models.ArchiveMessage {
+	output := make([]models.ArchiveMessage, 0)
+	for i := len(input) - 1; i >= 0; i-- {
+		//fmt.Println(input[i])
+		output = append(output, input[i])
+	}
+	return output
+}
+
 func handleMessagesJson(rawBytes []byte, item UploadResponse) (UploadResponse, error) {
 	fmt.Println(" Data: ")
 	data, err := getMessagesJson(rawBytes)
@@ -107,6 +116,8 @@ func handleMessagesJson(rawBytes []byte, item UploadResponse) (UploadResponse, e
 	}
 
 	addedMessagesCount := 0
+	data = reverseMessagesJson(data)
+
 	for _, message := range data {
 		if !messageAlreadyExists(existingMessages, message) {
 			_, err := addMessageToDataStore(message, channel)
@@ -121,7 +132,17 @@ func handleMessagesJson(rawBytes []byte, item UploadResponse) (UploadResponse, e
 			if err != nil {
 				//I believe this happens when a member that's no longer in any groups sent a message in a channel
 				fmt.Println(err)
-				continue
+				newMember := models.ArchiveMember{
+					MemberId: message.UserId,
+					ImageUrl: message.AvatarUrl,
+					Name:     message.Name,
+					Nickname: message.Name,
+				}
+				member, err := addMemberToDataStore(newMember, models.ArchiveChannel{}, true)
+				if err != nil {
+					return UploadResponse{}, err
+				}
+				members[message.UserId] = member
 			}
 			if !hasAlias {
 				member := members[message.UserId]
@@ -131,7 +152,7 @@ func handleMessagesJson(rawBytes []byte, item UploadResponse) (UploadResponse, e
 					CreatedAt: time.Unix(message.Date, 0),
 					AvatarUrl: message.AvatarUrl,
 				}
-				fmt.Printf("Add alias %+v to user %s\n", alias, message.UserId)
+				//fmt.Printf("Add alias %+v to user %s\n", alias, message.UserId)
 				err := addAliasToMemberInDataStore(member, alias)
 				if err != nil {
 					return item, err

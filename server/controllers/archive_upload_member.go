@@ -12,7 +12,7 @@ func handleChannelMembers(channel models.ArchiveChannel, members []models.Member
 	for _, member := range channel.Members {
 		if !memberInDataStore(members, member) {
 			fmt.Printf("Need to add member %s to data store.\n", member.MemberId)
-			res, err := addMemberToDataStore(member, channel)
+			res, err := addMemberToDataStore(member, channel, false)
 			if err != nil {
 				return err
 			}
@@ -71,14 +71,16 @@ func getMember(members []models.Member, newMember models.ArchiveMember) models.M
 	return models.Member{}
 }
 
-func addMemberToDataStore(member models.ArchiveMember, channel models.ArchiveChannel) (models.Member, error) {
+func addMemberToDataStore(member models.ArchiveMember, channel models.ArchiveChannel, noChannel bool) (models.Member, error) {
 
 	newMember := models.Member{
 		ArchiveMemberId: member.MemberId,
 		ImageUrl:        member.ImageUrl,
 		Name:            member.Name,
 		Aliases:         nil,
-		Channels:        []string{channel.ChannelId},
+	}
+	if !noChannel {
+		newMember.Channels = []string{channel.ChannelId}
 	}
 
 	created, err := common.CreateOne(models.MembersCollection(), &newMember)
