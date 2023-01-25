@@ -15,6 +15,7 @@ import (
 // Helper functionality to convert from MongoDB UUID to ID passed in API call
 
 var Database *mongo.Database
+var ContextDeadline = 10 * time.Second
 
 func OpenDatabaseConnection(URI string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -46,7 +47,7 @@ func GetOneById(c Collection, id primitive.ObjectID, v interface{}) error {
 }
 
 func GetOneByFilter(c Collection, filter bson.M, v interface{}) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ContextDeadline)
 	defer cancel()
 
 	res := Database.Collection(c.CollectionId).FindOne(ctx, filter)
@@ -71,7 +72,7 @@ func GetAll(c Collection, v interface{}) error {
 
 // GetAllWhere get all records in Collection c using a bson.M filter
 func GetAllWhere(c Collection, where bson.M, v interface{}) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ContextDeadline)
 	defer cancel()
 
 	cursor, err := Database.Collection(c.CollectionId).Find(ctx, where)
@@ -95,7 +96,7 @@ func GetAllWhereLimitSort(c Collection, where bson.M, v interface{}, limit int64
 		return GetAllWhere(c, where, v)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ContextDeadline)
 	defer cancel()
 
 	opts := options.Find()
@@ -120,7 +121,7 @@ func GetAllWhereLimitSort(c Collection, where bson.M, v interface{}, limit int64
 // CreateOne Create a record
 func CreateOne(c Collection, data interface{}) (interface{}, error) {
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ContextDeadline)
 	defer cancel()
 
 	model, ok := data.(DatabaseModel)
@@ -149,7 +150,7 @@ func UpdateOne(c Collection, id primitive.ObjectID, data interface{}) (interface
 }
 
 func DeleteOne(c Collection, id primitive.ObjectID) (int64, interface{}, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ContextDeadline)
 	defer cancel()
 
 	object, err := ObjectExists(c, id)
@@ -164,7 +165,7 @@ func DeleteOne(c Collection, id primitive.ObjectID) (int64, interface{}, error) 
 }
 
 func SetSubKey(c Collection, id primitive.ObjectID, key string, data interface{}) (int64, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ContextDeadline)
 	defer cancel()
 
 	_, err := ObjectExists(c, id)
@@ -213,7 +214,7 @@ func ByID(id primitive.ObjectID) bson.M {
 }
 
 func Count(c Collection, filter bson.M) (int64, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), ContextDeadline)
 	defer cancel()
 
 	return Database.Collection(c.CollectionId).CountDocuments(ctx, filter)

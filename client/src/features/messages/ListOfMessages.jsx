@@ -9,7 +9,7 @@ export const listOfMessagesStyle = {
     flex: 1
 }
 
-export default function ListOfMessages(props) {
+export default function ListOfMessages({isFetching, messages, showMoreBefore, showMoreAfter}) {
     const [open, setOpen] = useState(false)
 
     const onClick = (id) => {
@@ -20,11 +20,11 @@ export default function ListOfMessages(props) {
         }
     }
 
-    if (props.isFetching) {
+    if (isFetching) {
         return <Spin size={"large"} style={{margin: 50}}/>
     }
 
-    const m = props.messages || []
+    const m = messages || []
     const mView = []
 
     for (let i = 0; i < m.length; i++) {
@@ -53,8 +53,8 @@ export default function ListOfMessages(props) {
 
 
     return <div id={"messages-root"} style={listOfMessagesStyle}>
-        {props.showMoreBefore}
+        {showMoreBefore}
         {mView}
-        {props.showMoreAfter}
+        {showMoreAfter}
     </div>
 }

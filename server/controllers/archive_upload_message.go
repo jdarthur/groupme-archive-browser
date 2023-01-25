@@ -46,11 +46,11 @@ func getAllMessagesFromDataStore(channelId primitive.ObjectID) (map[string]model
 	return messageMap, nil
 }
 
-func getMessagesWithLimit(channelId primitive.ObjectID, limit int64, reverse bool) ([]models.Message, error) {
+func getMessagesWithLimit(channelId primitive.ObjectID, limit int64, reverseOrder bool) ([]models.Message, error) {
 	messages := make([]models.Message, 0)
 
 	x := 1
-	if reverse {
+	if reverseOrder {
 		x = -1
 	}
 

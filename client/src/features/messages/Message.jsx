@@ -231,6 +231,9 @@ function renderTextWithMentionsAndUrlClickable(messageText, attachments, allMemb
         if (type === "event") {
             return messageText
         }
+        if (type === "reply") {
+            return messageText
+        }
 
         return chunks
 

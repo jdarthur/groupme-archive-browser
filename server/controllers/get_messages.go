@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jdarthur/groupme-archive-browser/common"
 	"github.com/jdarthur/groupme-archive-browser/models"
+	"github.com/pkg/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"math/rand"
@@ -28,20 +29,28 @@ func (gmc GetMessagesController) GetAllMessages(c *gin.Context) {
 		return
 	}
 
-	reverse := c.Query("reverse") == "true"
+	reverseOrder := c.Query("reverse") == "true"
 	limit, err1 := limitFromQuery(c, 100)
 	if err != nil {
 		common.RespondWithError(c, err1)
 		return
 	}
 
-	messages, err := getMessagesWithLimit(channelId, limit, reverse)
+	messages, err := getMessagesWithLimit(channelId, limit, reverseOrder)
 	if err != nil {
 		common.Respond500(c, err)
 		return
 	}
-	if len(messages) > 0 {
-		messages[0].EndOfTheLine = true
+
+	if reverseOrder {
+		messages = reverse(messages)
+		if len(messages) > 0 {
+			messages[len(messages)-1].EndOfTheLine = true
+		}
+	} else {
+		if len(messages) > 0 {
+			messages[0].EndOfTheLine = true
+		}
 	}
 
 	common.RespondSuccess(c, messages, len(messages), false)
@@ -119,6 +128,7 @@ func isFirstOrLastMessage(message models.Message) (bool, error) {
 	}
 
 	if len(firstMessage) == 1 && firstMessage[0].MessageId == message.MessageId {
+		fmt.Println("Message is first message")
 		return true, nil
 	}
 
@@ -128,6 +138,7 @@ func isFirstOrLastMessage(message models.Message) (bool, error) {
 	}
 
 	if len(lastMessage) == 1 && lastMessage[0].MessageId == message.MessageId {
+		fmt.Println("Message is last message")
 		return true, nil
 	}
 
@@ -170,6 +181,10 @@ func (gmc GetMessagesController) FromRandomMessage(c *gin.Context) {
 func fromRandomMessage(c *gin.Context, allMessages []models.Message) {
 	rand.Seed(time.Now().UnixNano())
 
+	if len(allMessages) == 0 {
+		common.Respond500(c, errors.Errorf("length of allMessages was 0"))
+		return
+	}
 	fmt.Printf("choosing random message from list of size %d\n", len(allMessages))
 
 	var message models.Message
@@ -218,6 +233,8 @@ func (gmc GetMessagesController) MostControversial(c *gin.Context) {
 		common.Respond500(c, err)
 		return
 	}
+
+	fmt.Printf("got %d messages in channel\n", len(messages))
 
 	for i, message := range messages {
 		if message.Disavowal != nil && message.Disavowal.Disavow == true {
@@ -270,7 +287,7 @@ func messageCountInControversialPeriod(allMessages []models.Message, startIndex 
 	remainingMessages := len(allMessages) - startIndex - 1
 	for i := 1; i < remainingMessages; i++ {
 		message := allMessages[i+startIndex]
-		if startMessage.Date.Sub(message.Date) > ControversialTimePeriod {
+		if message.Date.Sub(startMessage.Date) > ControversialTimePeriod {
 			return i
 		}
 	}

@@ -167,11 +167,7 @@ function getFirstMessageId(messagesBefore, primaryMessages, viewType) {
     if (messagesBefore.length > 0) {
         firstMessageId = messagesBefore[0].message_id
     } else if (primaryMessages.length > 0) {
-        if (viewType === FROM_THE_BOTTOM) {
-            firstMessageId = primaryMessages[primaryMessages.length - 1].message_id
-        } else {
-            firstMessageId = primaryMessages[0].message_id
-        }
+        firstMessageId = primaryMessages[0].message_id
     }
 
     return firstMessageId
