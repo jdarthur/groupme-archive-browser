@@ -72,6 +72,7 @@ func main() {
 	apiAuth.GET("/highlights/:highlightId", highlightsCtl.GetOneHighlight)
 	apiAuth.POST("/highlights", highlightsCtl.CreateHighlight)
 	apiAuth.GET("/highlight_component/type/:type/from/:firstMessageId/through/:lastMessageId", highlightsCtl.GetHighlightComponent)
+	apiAuth.GET("/highlight_component/type/:type/from/:firstMessageId", highlightsCtl.GetHighlightComponent)
 	apiAuth.DELETE("/highlights/:highlightId", highlightsCtl.DeleteHighlight)
 
 	subAssignmentCtl := controllers.SubAssignmentController{}

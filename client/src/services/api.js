@@ -98,7 +98,7 @@ export const mainApi = createApi({
             providesTags: ['highlights']
         }),
         getHighlightComponent: builder.query({
-            query: (args) => `/api/highlight_component/type/${args.type}/from/${args.first_message_id}/through/${args.last_message_id}`,
+            query: (args) => `/api/highlight_component/type/${args.type}/from/${args.first_message_id}${args.type !== 'one_message' ? ('/through/' + args.last_message_id) : ""}`,
         }),
         getMessageById: builder.query({
             query: (messageId) => `/api/messages/${messageId}`

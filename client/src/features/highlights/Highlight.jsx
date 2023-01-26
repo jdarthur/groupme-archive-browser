@@ -47,7 +47,7 @@ export default function Highlight({members, member_id, created_at, title, compon
     );
 }
 
-export function getIcon(member, created_at) {
+export function getIcon(member, created_at, size) {
     if (member !== null) {
         const dt = <DateTime date={created_at} full/>
 
@@ -55,9 +55,9 @@ export function getIcon(member, created_at) {
             Created by {member.name} at {dt}
         </div>
 
-        return <Popover title={"Details"} content={content}>
+        return <Popover title={"Details"} content={content} placement={"right"}>
                 <span style={{fontWeight: "normal", fontSize: "0.9em"}}>
-                    {avatar(member, 40)}
+                    {avatar(member, size ? size : 40)}
                     {member.name}
                 </span>
         </Popover>

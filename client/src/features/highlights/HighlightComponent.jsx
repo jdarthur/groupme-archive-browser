@@ -27,7 +27,7 @@ export default function HighlightComponent({
     const highlightQuery = {
         type: type,
         first_message_id: first_message_id,
-        last_message_id: last_message_id,
+        last_message_id: last_message_id ? last_message_id : "none",
     }
 
     const {data, isFetching} = useGetHighlightComponentQuery(highlightQuery)
@@ -87,6 +87,8 @@ export default function HighlightComponent({
         </span>
     )
 
+    const content = expanded ? allMessages : (allMessages?.length? allMessages[0] : null)
+
     return (
         <div style={{display: 'flex', alignItems: "center", flexDirection: "column"}}>
             {comment ? component : null}
@@ -95,10 +97,10 @@ export default function HighlightComponent({
             {expanded ? viewInContext : null}
 
             <div style={{alignSelf: "flex-end", width: '95%'}}>
-                {expanded ? allMessages : allMessages[0]}
+                {content}
             </div>
-
             {expanded ? null : moreButton}
+
         </div>
     );
 }

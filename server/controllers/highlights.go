@@ -150,8 +150,14 @@ func (hc HighlightsController) GetHighlightComponent(c *gin.Context) {
 		common.RespondWithError(c, err)
 		return
 	}
+	var filterDate bson.M
+	if lastMessage.MessageId.IsZero() {
+		filterDate = bson.M{"$gte": firstMessage.Date, "$lte": firstMessage.Date}
+	} else {
+		filterDate = bson.M{"$gte": firstMessage.Date, "$lte": lastMessage.Date}
+	}
 
-	filter := bson.M{"date": bson.M{"$gte": firstMessage.Date, "$lte": lastMessage.Date}, "channel_id": firstMessage.ChannelId}
+	filter := bson.M{"date": filterDate, "channel_id": firstMessage.ChannelId}
 	messages := make([]models.Message, 0)
 	err2 := common.GetAllWhere(models.MessagesCollection(), filter, &messages)
 	if err2 != nil {
@@ -195,11 +201,12 @@ func (hc HighlightsController) ValidateComponentPath(c *gin.Context) (firstMessa
 		if lastMessage.MessageId.IsZero() {
 			return firstMessage, lastMessage, common.ApiErrorf400("Nonexistent last message ID: %s", lastMessageId)
 		}
+
+		if firstMessage.ChannelId != lastMessage.ChannelId {
+			return firstMessage, lastMessage, common.ApiErrorf400("First and last message IDs are from different channels")
+		}
 	}
 
-	if firstMessage.ChannelId != lastMessage.ChannelId {
-		return firstMessage, lastMessage, common.ApiErrorf400("First and last message IDs are from different channels")
-	}
 	return firstMessage, lastMessage, nil
 }
 

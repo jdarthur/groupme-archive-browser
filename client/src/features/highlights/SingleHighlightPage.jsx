@@ -30,12 +30,12 @@ export default function SingleHighlightPage() {
                             comment={component.comment}
                             first_message_id={component.first_message_id}
                             last_message_id={component.last_message_id}
-                            avatar={avatar(mem, 35)}
+                            //avatar={avatar(mem, 35)}
                             expanded={true}
         />
     ))
 
-    const user = getIcon(mem, highlight?.created_at)
+    const user = getIcon(mem, highlight?.created_at, 30)
 
     return (
         <div style={{padding: 10, maxWidth: "min(700px, 90vw)"}}>
@@ -46,14 +46,11 @@ export default function SingleHighlightPage() {
                 </Breadcrumb.Item>
                 <Breadcrumb.Item>{highlightId}</Breadcrumb.Item>
             </Breadcrumb>
-            <span style={{width: "100%", display: "inline-flex", alignItems: "center", justifyContent: "space-between", padding: 10}}>
+            <span style={{width: "100%", display: "flex", flexDirection: "column", alignItems: "flex-start", justifyContent: "space-between", padding: 10}}>
                 <span style={{fontSize: "1.5em", fontWeight: "bold", marginRight: 100}}>
                     {highlight?.title}
                 </span>
-                <span style={{fontSize: "0.9em"}}>
-                    Created by:
-                    <span style={{marginLeft: 10, fontSize: '1.3em'}}>{user}</span>
-                </span>
+                <span style={{paddingTop: 10, paddingBottom: 10, fontSize: "00.9em"}}>{user}</span>
             </span>
 
 
