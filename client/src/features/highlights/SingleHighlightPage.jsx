@@ -5,6 +5,7 @@ import {useAuth} from "../../app/store";
 import {Breadcrumb, Spin} from "antd";
 import {Link, useParams} from "react-router-dom";
 import HighlightComponent from "./HighlightComponent";
+import LoginNeeded from "../auth/LoginNeeded";
 
 export default function SingleHighlightPage() {
     let {highlightId} = useParams();
@@ -55,7 +56,7 @@ export default function SingleHighlightPage() {
 
 
             <div style={{paddingLeft: 20}}>
-                {c}
+                {noToken ? <LoginNeeded /> : c}
             </div>
 
         </div>
