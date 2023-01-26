@@ -1,6 +1,6 @@
 import React from 'react';
 import {useGetHighlightByIdQuery, useGetMembersQuery} from "../../services/api";
-import {avatar, getIcon, getMember} from "./Highlight";
+import {getIcon, getMember} from "./Highlight";
 import {useAuth} from "../../app/store";
 import {Breadcrumb, Spin} from "antd";
 import {Link, useParams} from "react-router-dom";
