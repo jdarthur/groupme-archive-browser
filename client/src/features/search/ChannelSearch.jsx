@@ -1,17 +1,27 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {Breadcrumb, Button, Divider, Input, Tag} from "antd";
-import {useGetChannelsQuery, useGetMembersQuery, useLazySearchMessagesForTextQuery} from "../../services/api";
+import {
+    useGetChannelsQuery,
+    useGetMembersQuery,
+    useLazySearchMessagesByLikeThresholdQuery,
+    useLazySearchMessagesForTextQuery
+} from "../../services/api";
 import {useNavigate, useParams} from "react-router-dom";
 import {Message} from "../messages/Message";
 import {ArrowRightOutlined} from "@ant-design/icons";
-import {rootMessagesStyle} from "../messages/Messages";
 import {useAuth} from "../../app/store";
 import LoginNeeded from "../auth/LoginNeeded";
+import PagedList from "../common/PagedList";
+import LikeThreshold from "./LikeThreshold";
 
+const BY_TEXT = "by text"
+const BY_LIKE_COUNT = "by like count"
 
 export default function ChannelSearch() {
     let {channelId} = useParams();
     let navigate = useNavigate()
+
+    const [mode, setMode] = useState(BY_TEXT)
 
     const noToken = !useAuth().token
 
@@ -20,14 +30,24 @@ export default function ChannelSearch() {
 
     const channelName = getChannelName(channelId, channels?.resource || [])
 
-    const [search, results] = useLazySearchMessagesForTextQuery()
+    const [search, textResults] = useLazySearchMessagesForTextQuery()
+    const [byThreshold, likeThresholdResults] = useLazySearchMessagesByLikeThresholdQuery()
+
+    const results = mode === BY_TEXT ? textResults : likeThresholdResults
 
     const onSearch = (value) => {
+        setMode(BY_TEXT)
         search({channelId: channelId, body: {"search_text": value}})
     }
 
     const goTo = (messageId) => {
         navigate(`/messages/${channelId}?start=${messageId}`)
+    }
+
+    const onSearchByLikeThreshold = (value) => {
+        console.log("search by like threshold: ", value)
+        setMode(BY_LIKE_COUNT)
+        byThreshold({channelId: channelId, body: {"like_threshold": value}})
     }
 
     const r = results?.data?.resource || []
@@ -53,6 +73,7 @@ export default function ChannelSearch() {
                 channelId={message.channel_id}
                 contextButton={contextButton}
                 message_id={message.message_id}
+                setOpen={() => {}}
             />
     })
 
@@ -61,10 +82,12 @@ export default function ChannelSearch() {
         resultCount = <Tag style={{marginLeft: 10}} >{r.length} results </Tag>
     }
 
-    const s = {...rootMessagesStyle}
-    s.overflowX = "visible"
+    const s = {
+        flexGrow: 1,
+        minHeight: 0
+    }
 
-    const content = <div>
+    const content = <div style={{display: "flex", flexDirection: "column", flex: "1 1 1px", minHeight: 0}}>
         <span style={{display: 'inline-flex', alignItems: "center", paddingTop: 10, paddingLeft: 10}}>
             <Input.Search placeholder="Search"
                           onSearch={onSearch}
@@ -72,17 +95,16 @@ export default function ChannelSearch() {
                           loading={results.isFetching}
             />
             {resultCount}
+            <LikeThreshold onSearch={onSearchByLikeThreshold}/>
         </span>
 
-        <Divider />
+        <Divider style={{margin: 10}} />
         <div style={s}>
-            <div style={{display: "flex", flexDirection: "column", flex: 1}}>
-                {messageList}
-            </div>
+                <PagedList items={messageList} />
         </div>
     </div>
 
-    return <div>
+    return <div style={{height: "100%", width: '100%', display: "flex", alignItems: "flex-start", flexDirection: "column"}}>
         <Breadcrumb style={{paddingTop: 10, paddingLeft: 10}}>
             <Breadcrumb.Item>Home</Breadcrumb.Item>
             {channelName ? <Breadcrumb.Item>{channelName}</Breadcrumb.Item> : null}

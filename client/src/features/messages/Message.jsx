@@ -149,7 +149,7 @@ function renderImage(attachments) {
         }
     }
 
-    if (type === "image" && url !== null) {
+    if ((type === "image" || type === "linked_image") && url !== null) {
         return <div>
             <Image src={url} style={{maxWidth: 'min(400px, 70vw)', maxHeight: "min(400px, 70vh)", objectFit: "cover"}}/>
         </div>
@@ -221,18 +221,26 @@ function renderTextWithMentionsAndUrlClickable(messageText, attachments, allMemb
             let message = messageText
             for (let i = 0; i < order.length; i++) {
                 const nickname = order[i].nickName
-                message = messageText.replace(`@${nickname}`, "")
-                chunks.push(<PosterIdentity key={order[i].userId} members={allMembers} userId={order[i].userId} name={`@${nickname}`} blue/>)
+                if (nickname !== null) {
+                    message = messageText.replace(`@${nickname}`, "")
+                    chunks.push(<PosterIdentity key={order[i].userId} members={allMembers} userId={order[i].userId} name={`@${nickname}`} blue/>)
+                }
             }
 
             chunks.push(<span key={"message-text-"}>{lineBreakRawText(message)}</span>)
         }
-
-        if (type === "event") {
+        else if (type === "event") {
             return messageText
         }
-        if (type === "reply") {
+        else if (type === "reply") {
             return messageText
+        } else if (type === "image" || type === "linked_image") {
+            // handle this elsewhere
+        } else if (type === "emoji") {
+            return "�"
+        } else {
+            console.log("unknown attachment type")
+            console.log(type, attachments)
         }
 
         return chunks
@@ -243,17 +251,18 @@ function renderTextWithMentionsAndUrlClickable(messageText, attachments, allMemb
 }
 
 function getUsersCurrentNickname(userId, allMembers, postingDate, channelId) {
+    const postDateNative = new Date(postingDate)
     for (let i = 0; i < allMembers?.length; i++) {
         const member = allMembers[i]
         if (member.archive_member_id === userId) {
-            let a = member.aliases[0].name
-            for (let j = 1; j < member.aliases?.length; j++) {
+            for (let j = 0; j < member.aliases?.length; j++) {
                 const alias = member.aliases[j]
-                if (alias.created_at < postingDate && alias.channel_id === channelId) {
-                    return a
-                }
                 if (alias.channel_id === channelId) {
-                    a = alias.name
+                    const createdAtNative = new Date(alias.created_at)
+                    //aliases are sorted in descending order, so if we get an
+                    if (createdAtNative <= postDateNative) {
+                        return alias.name
+                    }
                 }
             }
         }
@@ -280,7 +289,7 @@ function getOrderOfMentions(messageText, users) {
     })
 
     for (let i = 0; i < output.length; i++) {
-        if (output[i].index === -1) {
+        if (output[i].index === -1 && output[i].nickName !== null) {
             console.log("Couldn't locate @-mention index in message: ", messageText, output[i])
         }
     }

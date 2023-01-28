@@ -32,7 +32,7 @@ root.render(
                     <App/>
                 </BrowserRouter>
             </Provider>
-        </Auth0Provider>,
+        </Auth0Provider>
 
     </React.StrictMode>)
 

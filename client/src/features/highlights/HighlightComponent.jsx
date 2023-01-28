@@ -14,6 +14,24 @@ const componentStyle = {
     padding: 5
 }
 
+const viewInContextStyle = {
+    borderLeft: "1px solid #f0f0f0",
+    display: "flex",
+    justifyContent: "center",
+    width: "97%",
+    alignSelf: "flex-end",
+    padding: 10,
+    background: "white"
+}
+
+const contentStyle = {
+    alignSelf: "flex-end",
+    width: '97%',
+    borderLeft: "1px solid #f0f0f0",
+    paddingLeft: 5,
+    background: "white"
+}
+
 export default function HighlightComponent({
                                                type,
                                                first_message_id,
@@ -35,9 +53,11 @@ export default function HighlightComponent({
     let moreButton = null
     if (type === THREAD_STARTING_ENDING) {
         const title = `And ${data?.resource.length - 1} more messages...`
-        moreButton = <Button style={{margin: 10}}>
-            <a href={`/highlights/${highlightId}`}>{title}</a>
-        </Button>
+        moreButton = <div style={{display: "flex", justifyContent: "center", width: "100%", background: "white", borderTop: "1px solid #f0f0f0"}}>
+            <Button style={{margin: 10, alignSelf: "center"}}>
+                <a href={`/highlights/${highlightId}`}>{title}</a>
+            </Button>
+        </div>
     }
 
     const channelId = data?.resource[0].channel_id
@@ -87,16 +107,18 @@ export default function HighlightComponent({
         </span>
     )
 
-    const content = expanded ? allMessages : (allMessages?.length? allMessages[0] : null)
+    const content = expanded ? allMessages : (allMessages?.length ? allMessages[0] : null)
 
     return (
-        <div style={{display: 'flex', alignItems: "center", flexDirection: "column"}}>
-            {comment ? component : null}
+        <div style={{display: 'flex', alignItems: "flex-start", flexDirection: "column", background: "#f5f5f5"}}>
+            <div style={{background: "white", width: "100%", paddingBottom: 10}}>{comment ? component : null}</div>
 
-            <div style={{borderBottom: '1px solid #f0f0f0', marginBottom: 10, alignSelf: "stretch"}}/>
-            {expanded ? viewInContext : null}
+            <div style={{borderBottom: '1px solid #f0f0f0', alignSelf: "stretch"}}/>
+            <div style={viewInContextStyle}>
+                {expanded ? viewInContext : null}
+            </div>
 
-            <div style={{alignSelf: "flex-end", width: '95%'}}>
+            <div style={contentStyle}>
                 {content}
             </div>
             {expanded ? null : moreButton}

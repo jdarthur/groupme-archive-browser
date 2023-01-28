@@ -70,6 +70,13 @@ export const mainApi = createApi({
                 body: args.body
             })
         }),
+        searchMessagesByLikeThreshold: builder.query({
+            query: (args) => ({
+                url: `/api/channels/${args.channelId}/search/like_threshold`,
+                method: "POST",
+                body: args.body
+            })
+        }),
         getMessagesDefault: builder.query({
             query: (args) => `/api${args.apiBase}${args.messageId ? args.messageId : args.channelId}/${args.endSegment}${args.query}`,
             providesTags: ["messages", "messages_from_id"]
@@ -145,6 +152,7 @@ export const {
     useGetMessagesFromMessageIdQuery,
     useLazyGetMessagesFromMessageIdQuery,
     useLazySearchMessagesForTextQuery,
+    useLazySearchMessagesByLikeThresholdQuery,
     useGetMessagesDefaultQuery,
     useDisavowMessageMutation,
     useUndisavowMessageMutation,

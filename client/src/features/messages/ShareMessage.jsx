@@ -16,7 +16,7 @@ export default function ShareMessage({message_id, channelId}) {
 
     const onClick = (event) => {
         event.stopPropagation()
-        const url = `${window.location.origin}/channels/${channelId}/messages?start=${message_id}`
+        const url = `${window.location.origin}/messages/${channelId}?start=${message_id}`
         navigator.clipboard.writeText(url).then(() => {
             openNotification()
         })

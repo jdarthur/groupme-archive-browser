@@ -19,7 +19,7 @@ import Highlights from "./features/highlights/Highlights";
 import SingleHighlightPage from "./features/highlights/SingleHighlightPage";
 import SubAssignment from "./features/members/SubAssignment";
 
-const {Content, Header, Footer} = Layout;
+const {Content, Header} = Layout;
 
 const CHANNELS = "channels"
 const FRIENDS = "friends"
@@ -59,7 +59,7 @@ export default function App() {
 
     const defaultView = <AllChannels/>
     return (
-        <div style={{height: '100vh', display: "flex", flexDirection: "column"}}>
+        <div style={{height: '100vh', display: "flex", flexDirection: "column", position: "absolute", top: 0, bottom: 0, left: 0}}>
             <Header>
                 <Menu mode="horizontal"
                       defaultSelectedKeys={["channels"]}
@@ -90,7 +90,7 @@ export default function App() {
 
             </Header>
             <Routes>
-                <Route path="/" element={<Content style={{minHeight: 500, flex: 1}}> <Outlet/> </Content>}>
+                <Route path="/" element={<Content style={{minHeight: 500, flexGrow: 1}}> <Outlet/> </Content>}>
                     <Route path="channels" element={<Outlet/>}>
                         <Route index element={defaultView}/>
                     </Route>
@@ -113,9 +113,6 @@ export default function App() {
                     <Route path="admin/sub_assignment" element={<SubAssignment/>}/>
                 </Route>
             </Routes>
-
-            <Footer style={{textAlign: 'center'}}>
-            </Footer>
         </div>
     );
 }

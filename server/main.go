@@ -57,6 +57,7 @@ func main() {
 
 	searchCtl := controllers.SearchController{}
 	apiAuth.POST("/channels/:channelId/search/contains_text", searchCtl.SearchForText)
+	apiAuth.POST("/channels/:channelId/search/like_threshold", searchCtl.SearchByLikeThreshold)
 
 	membersCtl := controllers.MemberController{}
 	apiAuth.GET("/friends", membersCtl.GetMembers)

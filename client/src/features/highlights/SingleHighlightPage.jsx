@@ -39,8 +39,8 @@ export default function SingleHighlightPage() {
     const user = getIcon(mem, highlight?.created_at, 30)
 
     return (
-        <div style={{padding: 10, maxWidth: "min(700px, 90vw)"}}>
-            <Breadcrumb>
+        <div style={{padding: 0, maxWidth: "min(700px, 100vw)"}}>
+            <Breadcrumb style={{padding: 10}}>
                 <Breadcrumb.Item>Home</Breadcrumb.Item>
                 <Breadcrumb.Item>
                     <Link to={"/highlights"}>Highlights</Link>
@@ -55,7 +55,7 @@ export default function SingleHighlightPage() {
             </span>
 
 
-            <div style={{paddingLeft: 20}}>
+            <div>
                 {noToken ? <LoginNeeded /> : c}
             </div>
 
