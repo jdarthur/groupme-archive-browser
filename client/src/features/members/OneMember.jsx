@@ -7,6 +7,7 @@ import FixedSizeImage from "../common/FixedSizeImage";
 import InlineStatistic from "../common/InlineStatistic";
 import FriendAvatars from "./FriendAvatars";
 import {useAuth} from "../../app/store";
+import TopPosts from "./TopPosts";
 
 const sideBarStyle = {
     paddingTop: 25,
@@ -68,7 +69,8 @@ export default function OneMember() {
                         <Tabs defaultActiveKey={"1"}
                               items={[
                                   {label: "Aliases", key: "1", children: aliases},
-                                  {label: "Avatars", key: "2", children: <FriendAvatars aliases={friend.aliases || []} />}
+                                  {label: "Avatars", key: "2", children: <FriendAvatars aliases={friend.aliases || []} />},
+                                  {label: "Top Posts", key: "3", children: <TopPosts friendId={friendId} />}
                               ]}
                         />
                     </div>

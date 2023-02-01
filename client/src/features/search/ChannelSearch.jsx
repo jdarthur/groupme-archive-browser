@@ -1,31 +1,25 @@
 import React, {useState} from 'react';
-import {Breadcrumb, Button, Divider, Input, Tag} from "antd";
+import {Breadcrumb, Divider, Input, Tag} from "antd";
 import {
     useGetChannelsQuery,
-    useGetMembersQuery,
     useLazySearchMessagesByLikeThresholdQuery,
     useLazySearchMessagesForTextQuery
 } from "../../services/api";
-import {useNavigate, useParams} from "react-router-dom";
-import {Message} from "../messages/Message";
-import {ArrowRightOutlined} from "@ant-design/icons";
+import {useParams} from "react-router-dom";
 import {useAuth} from "../../app/store";
 import LoginNeeded from "../auth/LoginNeeded";
-import PagedList from "../common/PagedList";
 import LikeThreshold from "./LikeThreshold";
+import PagedListOfMessagesWithContextLink from "./PagedListOfMessagesWithContextLink";
 
 const BY_TEXT = "by text"
 const BY_LIKE_COUNT = "by like count"
 
 export default function ChannelSearch() {
     let {channelId} = useParams();
-    let navigate = useNavigate()
 
     const [mode, setMode] = useState(BY_TEXT)
 
     const noToken = !useAuth().token
-
-    const {data: members} = useGetMembersQuery(undefined, {skip: noToken})
     const {data: channels} = useGetChannelsQuery(undefined, {skip: noToken})
 
     const channelName = getChannelName(channelId, channels?.resource || [])
@@ -40,10 +34,6 @@ export default function ChannelSearch() {
         search({channelId: channelId, body: {"search_text": value}})
     }
 
-    const goTo = (messageId) => {
-        navigate(`/messages/${channelId}?start=${messageId}`)
-    }
-
     const onSearchByLikeThreshold = (value) => {
         console.log("search by like threshold: ", value)
         setMode(BY_LIKE_COUNT)
@@ -51,40 +41,11 @@ export default function ChannelSearch() {
     }
 
     const r = results?.data?.resource || []
-    const messageList = r.map((message) => {
-
-        const contextButton = <Button key={`view-in-context_${message.message_id}`}
-                                      onClick={() => goTo(message.message_id)}>
-            View
-            <ArrowRightOutlined style={{fontSize: "0.8em"}} />
-        </Button>
-
-
-        return <Message
-                key={message.message_id}
-                name={message.poster_name}
-                date={message.date}
-                text={message.message_text}
-                avatar_url={message.avatar_url}
-                user_id={message.user_id}
-                attachments={message.message_attachments}
-                members={members}
-                liked_by={message.liked_by}
-                channelId={message.channel_id}
-                contextButton={contextButton}
-                message_id={message.message_id}
-                setOpen={() => {}}
-            />
-    })
+    const messageList = <PagedListOfMessagesWithContextLink messages={r} loading={results.isFetching} />
 
     let resultCount = null
     if (!results.isFetching && r.length > 0) {
         resultCount = <Tag style={{marginLeft: 10}} >{r.length} results </Tag>
-    }
-
-    const s = {
-        flexGrow: 1,
-        minHeight: 0
     }
 
     const content = <div style={{display: "flex", flexDirection: "column", flex: "1 1 1px", minHeight: 0}}>
@@ -99,9 +60,7 @@ export default function ChannelSearch() {
         </span>
 
         <Divider style={{margin: 10}} />
-        <div style={s}>
-                <PagedList items={messageList} />
-        </div>
+        {messageList}
     </div>
 
     return <div style={{height: "100%", width: '100%', display: "flex", alignItems: "flex-start", flexDirection: "column"}}>

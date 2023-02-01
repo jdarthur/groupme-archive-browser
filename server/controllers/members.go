@@ -71,9 +71,47 @@ func (mc MemberController) GetOneMemberByAuth0Sub(c *gin.Context) {
 	}
 }
 
+func (mc MemberController) GetTopPosts(c *gin.Context) {
+
+	idFromPath := c.Param("friendId")
+	friendId, err := primitive.ObjectIDFromHex(idFromPath)
+	if err != nil {
+		e := common.ApiErrorf400("Invalid friend ID from path: %s", idFromPath)
+		common.RespondWithError(c, e)
+		return
+	}
+
+	member := models.Member{}
+	err = common.GetOneById(models.MembersCollection(), friendId, &member)
+	if err != nil {
+		common.Respond500(c, err)
+		return
+	}
+
+	messages := make([]models.Message, 0)
+	err = common.GetAllWhere(models.MessagesCollection(), bson.M{"user_id": member.ArchiveMemberId}, &messages)
+	if err != nil {
+		common.Respond500(c, err)
+	} else {
+		messages := sortMessagesByLikeCount(messages, 200)
+		common.RespondSuccess(c, messages, len(messages), false)
+	}
+}
+
 func sortAliasesByDateDescending(aliases []models.Alias) []models.Alias {
 	sort.Slice(aliases, func(i, j int) bool {
 		return aliases[i].CreatedAt.After(aliases[j].CreatedAt)
 	})
 	return aliases
+}
+
+func sortMessagesByLikeCount(messages []models.Message, limit int) []models.Message {
+	sort.Slice(messages, func(i, j int) bool {
+		return len(messages[i].LikedBy) > len(messages[j].LikedBy)
+	})
+
+	if limit != -1 && limit < len(messages) {
+		messages = messages[0:limit]
+	}
+	return messages
 }

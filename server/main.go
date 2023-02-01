@@ -63,6 +63,7 @@ func main() {
 	apiAuth.GET("/friends", membersCtl.GetMembers)
 	apiAuth.GET("/friends/:friendId", membersCtl.GetOneMember)
 	apiAuth.GET("/friends/by_sub/:sub", membersCtl.GetOneMemberByAuth0Sub)
+	apiAuth.GET("/friends/:friendId/top_posts", membersCtl.GetTopPosts)
 
 	disavowCtl := controllers.DisavowController{}
 	apiAuth.POST("/messages/disavow/:messageId", disavowCtl.Disavow)

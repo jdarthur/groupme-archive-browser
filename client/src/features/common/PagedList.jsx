@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
-import {Pagination} from "antd";
+import {Empty, Pagination} from "antd";
 
-export default function PagedList({items}) {
+export default function PagedList({items, emptyDescription}) {
     const [page, setPage] = useState(0)
     const [pageSize, setPageSize] = useState(10)
 
@@ -22,7 +22,7 @@ export default function PagedList({items}) {
     return (
         <div style={{display: "flex", flexDirection: "column", height: "100%"}}>
             <div style={{display: "flex", flexDirection: "column", flex: 1, overflowY: "auto", maxWidth: "min(700px, 100vw)", paddingRight: '5.5rem'}}>
-                {subset}
+                {subset.length ? subset : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={emptyDescription ? emptyDescription : "No items"} />}
             </div>
             <div style={{padding: 10, borderTop: "1px solid #d9d9d9"}}>
                 {list.length > 0 ? <Pagination total={items?.length}

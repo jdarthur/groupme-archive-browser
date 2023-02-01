@@ -136,6 +136,9 @@ export const mainApi = createApi({
             }),
             invalidatesTags: ["friends"]
         }),
+        getTopPosts: builder.query({
+            query: (id) => `/api/friends/${id}/top_posts`
+        }),
     }),
 })
 
@@ -166,4 +169,5 @@ export const {
     useGetHighlightByIdQuery,
     useDeleteHighlightMutation,
     useUpdateAuth0SubMutation,
+    useGetTopPostsQuery,
 } = mainApi
